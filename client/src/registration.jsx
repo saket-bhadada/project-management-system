@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import './App.css'
 
-function registration(){
+function Registration(){
     const [email,setEmail] = React.useState('')
     const [password,setPassword] = React.useState('')
 
@@ -15,7 +15,7 @@ function registration(){
     }
     return (
     <div style={styles.container}>
-      <h2 style={styles.title}>Login</h2>
+      <h2 style={styles.title}>Register</h2>
       <form onSubmit={handleSubmit} style={styles.form}>
         <input
           type="email"
@@ -33,7 +33,7 @@ function registration(){
           style={styles.input}
           required
         />
-        <button type="submit" style={styles.button}>Login</button>
+        <button type="submit" style={styles.button}>Register</button>
       </form>
     </div>
   );
@@ -87,4 +87,4 @@ const styles = {
   },
 };
 
-export default registration;
+export default Registration;
