@@ -6,12 +6,18 @@ import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth2";
 
 // Create a new router object
-const router = express.Router();
+const PassportRouter = express.Router();
 
 // Define a GET route on this router
-router.get("/",(req,res)=>{
+PassportRouter.get("/",(req,res)=>{
     // Send a single JSON response
     res.json({ message: "hello world" });
+});
+
+PassportRouter.post("/register",(req,res)=>{
+    const {email,password}=req.body;
+    console.log(email,password);
+  res.json({ message: "User registered successfully!" });
 });
 
 // TODO: Add Passport.js strategies (Local, Google) here
@@ -20,4 +26,4 @@ router.get("/",(req,res)=>{
 // router.post("/register", ...);
 
 // Export the router to be used in other parts of the application
-export default router;
+export default PassportRouter;

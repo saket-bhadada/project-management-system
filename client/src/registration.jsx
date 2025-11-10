@@ -5,9 +5,21 @@ function Registration(){
     const [email,setEmail] = React.useState('')
     const [password,setPassword] = React.useState('')
 
-    function handleSubmit(e){
+    async function handleSubmit(e){
         e.preventDefault();
-        console.log(email,password);
+        try {
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            });
+            const data = await response.json();
+            console.log('Registration response:', data);
+        } catch (error) {
+            console.error('Registration failed:', error);
+        }
     }
 
     function handlegooglebutton(){
