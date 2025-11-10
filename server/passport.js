@@ -15,11 +15,17 @@ PassportRouter.get("/",(req,res)=>{
 });
 
 PassportRouter.post("/register",(req,res)=>{
+    const { email, password } = req.body;
+    // Accept either `userType` (frontend) or `usertype` (backend) and normalize
+    const userType = req.body.userType || req.body.usertype;
+    console.log(email, password, userType);
+    res.json({ message: "User registered successfully!", userType });
+});
+PassportRouter.post("/login",(req,res)=>{
     const {email,password}=req.body;
     console.log(email,password);
-  res.json({ message: "User registered successfully!" });
+  res.json({ message: "User logged in successfully!" });
 });
-
 // TODO: Add Passport.js strategies (Local, Google) here
 
 // TODO: Add registration and login routes here
