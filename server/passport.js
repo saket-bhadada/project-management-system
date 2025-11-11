@@ -24,7 +24,7 @@ PassportRouter.post("/register",(req,res)=>{
 PassportRouter.post("/login",(req,res)=>{
     const {email,password}=req.body;
     console.log(email,password);
-  res.json({ message: "User logged in successfully!" });
+    res.json({ message: "User logged in successfully!" });
 });
 // TODO: Add Passport.js strategies (Local, Google) here
 
