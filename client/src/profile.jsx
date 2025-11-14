@@ -8,9 +8,11 @@ export default function Profile(){
             const response = await fetch('/api/profile',{
                 method: 'POST'
             })
+            const data = await response.json();
+            console.log(data);
         }
         catch(err){
-            console.log(err);
+            console.error(err);
         }
     }
     return(
