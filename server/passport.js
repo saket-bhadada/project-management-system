@@ -1,12 +1,12 @@
 import express from "express";
 import passport from "passport";
 // import pg from "pg";
-import bcrypt from "bcrypt";
+import bcrypt, { hash } from "bcrypt";
 import { Strategy as LocalStrategy, Strategy } from "passport-local";
-import { Strategy as GoogleStrategy } from "passport-google-oauth2";
 
 // Create a new router object
 const PassportRouter = express.Router();
+const saltround = 10;
 
 // Define a GET route on this router
 PassportRouter.get("/",(req,res)=>{
@@ -14,24 +14,49 @@ PassportRouter.get("/",(req,res)=>{
     res.json({ message: "hello world" });
 });
 
-PassportRouter.post("/register",(req,res)=>{
-    const { email, password } = req.body;
-    // Accept either `userType` (frontend) or `usertype` (backend) and normalize
-    const userType = req.body.userType || req.body.usertype;
-    console.log(email, password, userType);
-    res.json({ message: "User registered successfully!", userType });
-});
-PassportRouter.post("/login",(req,res)=>{
-    const {email,password}=req.body;
-    console.log(email,password);
-    res.json({ message: "User logged in successfully!" });
-    try{
+PassportRouter.post("/login",
+    passport.authenticate("local",{
+        successRedirect:"/home",
+        failureRedirect:"/login"
+        // failureFlash: true // Optionally, enable flash messages for login failures
+    })
+)
 
+PassportRouter.post("/register",async (req,res)=>{
+    const { email, password, typeuser } = req.body;
+    try{
+        const checkresult = await db.query();
+        if(checkresult.row.length>0){
+            res.redirect("/login");
+        }else{
+            bcrypt.hash(password,saltround,async(err,hash)=>{
+                if(err){
+                    console.error("error hashing the password", err);
+                }else{
+                    const result = await db.query();
+                    const user = result.rows[0];
+                    req.login(user,(err)=>{
+                        console.log("success");
+                        res.redirect("/home");
+                    });
+                }
+            });
+        }
     }catch(err){
-        console.error(err);
-        res.status(500).json({ message: "Internal server error" });
+        console.log(err);
     }
 });
+// PassportRouter.post("/login",(req,res)=>{
+//     const {email,password}=req.body;
+//     console.log(email,password);
+//     res.json({ message: "User logged in successfully!" });
+//     try{
+
+//     }catch(err){
+//         console.error(err);
+//         res.status(500).json({ message: "Internal server error" });
+//     }
+// });
 
 passport.use(
     "local",
