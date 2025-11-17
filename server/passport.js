@@ -4,6 +4,15 @@ import passport from "passport";
 import bcrypt, { hash } from "bcrypt";
 import { Strategy as LocalStrategy, Strategy } from "passport-local";
 
+// Temporary DB stub to avoid ReferenceError while DB is not configured.
+// Replace with a real DB connection (pg Pool) and proper queries.
+const db = {
+    query: async (..._args) => {
+        // Default: return empty result set
+        return { rows: [] };
+    },
+};
+
 // Create a new router object
 const PassportRouter = express.Router();
 const saltround = 10;
@@ -34,7 +43,7 @@ PassportRouter.post("/register",async (req,res)=>{
     const { email, password, typeuser } = req.body;
     try{
         const checkresult = await db.query();
-        if(checkresult.row.length>0){
+        if(checkresult.rows.length > 0){
             res.redirect("/login");
         }else{
             bcrypt.hash(password,saltround,async(err,hash)=>{
@@ -71,7 +80,7 @@ passport.use(
     new Strategy(async function verify(username,password,cb){
         try{
             const result = await db.query();
-            if(result.row.length>0){
+            if(result.rows.length > 0){
                 const user = result.rows[0];
                 const storedHashpassword = user.password;
                 bcrypt.compare(password,storedHashpassword,(err,valid)=>{
