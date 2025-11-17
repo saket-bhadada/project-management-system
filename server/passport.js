@@ -14,13 +14,21 @@ PassportRouter.get("/",(req,res)=>{
     res.json({ message: "hello world" });
 });
 
-PassportRouter.post("/login",
-    passport.authenticate("local",{
-        successRedirect:"/home",
-        failureRedirect:"/login"
-        // failureFlash: true // Optionally, enable flash messages for login failures
-    })
-)
+// Use a custom callback so we can return JSON when the frontend calls via fetch.
+PassportRouter.post('/login', (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+        if (err) return next(err);
+        if (!user) {
+            // Authentication failed
+            return res.status(401).json({ success: false, message: info?.message || 'Invalid credentials', redirect: '/login' });
+        }
+        // Establish a session and return success + redirect path
+        req.login(user, (err) => {
+            if (err) return next(err);
+            return res.json({ success: true, message: 'Logged in', redirect: '/home' });
+        });
+    })(req, res, next);
+});
 
 PassportRouter.post("/register",async (req,res)=>{
     const { email, password, typeuser } = req.body;

@@ -1,22 +1,31 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './App.css'
 
 function Login(){
     const [email,setEmail] = React.useState('')
     const [password,setPassword] = React.useState('')
+  const navigate = useNavigate()
 
     async function handleSubmit(e){
         e.preventDefault();
         try {
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
-            const data = await response.json();
-            console.log('Login response:', data);
+          const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
+          });
+          const data = await response.json();
+          console.log('Login response:', data);
+          if (response.ok && data.redirect) {
+            // navigate within the SPA to the redirected path
+            navigate(data.redirect);
+          } else if (!response.ok) {
+            // show server message or generic error
+            alert(data.message || 'Login failed');
+          }
         } catch (error) {
             console.error('Login failed:', error);
         }
