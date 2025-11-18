@@ -4,7 +4,7 @@ import express from "express";
 const profileRouter = express.Router();
 
 profileRouter.get("/profile",async(req,res)=>{
-    if(req.isAuthenticated){
+    if(req.isAuthenticated()){
         res.json({user:req.user});
     }else{
         res.redirect("/login");

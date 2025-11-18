@@ -4,6 +4,8 @@ import "./profile.css";
 export default function Profile() {
     const [user, setUser] = useState(null);
     const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState("");
+
 
     async function loadProfile() {
         try {
@@ -28,9 +30,48 @@ export default function Profile() {
         loadProfile();
     }, []);
 
+    async function addmessage(){
+        if(!newMessage){
+            return;
+        }
+        try{
+            const response = await fetch("/api/messages",{
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({message:newMessage})
+            })
+            const data = await response.json();
+            if(data.success){
+                setMessages([...messages,data.message]);
+                setNewMessage("");
+            }
+        }catch(err){
+            console.error("Error adding message", err);
+        }
+    }
+
+    async function deleteMessage(msgId) {
+        try {
+            const response = await fetch(`/api/messages/${msgId}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setMessages(messages.filter(m => m.id !== msgId));
+            }
+        } catch (err) {
+            console.error("Error deleting message", err);
+        }
+    }
+
     return (
         <div className="profile-container">
-
             <h2>My Profile</h2>
 
             {/* USER DETAILS */}
@@ -50,21 +91,55 @@ export default function Profile() {
 
             <hr />
 
-            {/* USER MESSAGES */}
-            <h3>My Messages</h3>
+            {/* ===========================
+                STUDENT VIEW
+            ============================ */}
+            {user?.typeuser === "student" && (
+                <div>
+                    <h3>Students cannot view messages.</h3>
+                </div>
+            )}
 
-            <div className="messages-list">
-                {messages.length > 0 ? (
-                    messages.map((msg, index) => (
-                        <div key={index} className="message-item">
-                            {msg.message}
-                        </div>
-                    ))
-                ) : (
-                    <p>No messages uploaded.</p>
-                )}
-            </div>
+            {/* ===========================
+                STAFF VIEW
+            ============================ */}
+            {user?.typeuser === "staff" && (
+                <>
+                    <h3>My Messages</h3>
 
+                    {/* Add message */}
+                    <div className="add-message-box">
+                        <textarea
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            placeholder="Write a message..."
+                        ></textarea>
+
+                        <button onClick={handleAddMessage}>Add Message</button>
+                    </div>
+
+                    {/* List messages */}
+                    <div className="messages-list">
+                        {messages.length > 0 ? (
+                            messages.map((msg) => (
+                                <div key={msg.id} className="message-item">
+                                    <p>{msg.message}</p>
+
+                                    {/* Delete only own messages */}
+                                    <button
+                                        className="delete-btn"
+                                        onClick={() => deleteMessage(msg.id)}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            ))
+                        ) : (
+                            <p>No messages uploaded.</p>
+                        )}
+                    </div>
+                </>
+            )}
         </div>
     );
 }
