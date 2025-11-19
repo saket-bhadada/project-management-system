@@ -52,23 +52,6 @@ function Home() {
       <div className="container">
         <h2>All Messages</h2>
 
-        <form onSubmit={handleSubmit} style={{ marginBottom: 16 }}>
-          <input
-            placeholder="Your email (optional)"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{ display: 'block', marginBottom: 8, padding: 8, width: '100%' }}
-          />
-          <textarea
-            placeholder="Write a message"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            rows={3}
-            style={{ display: 'block', marginBottom: 8, padding: 8, width: '100%' }}
-          />
-          <button type="submit" style={{ padding: '8px 12px' }}>Add Message</button>
-        </form>
-
         {messages.length === 0 ? (
           <div>No messages yet.</div>
         ) : (
