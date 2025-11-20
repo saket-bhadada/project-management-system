@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import './App.css'
+import { useNavigate } from 'react-router-dom'
 
 function Registration() {
   const [email, setEmail] = useState('')
@@ -18,10 +19,17 @@ function Registration() {
       })
       const data = await response.json()
       console.log('Registration response:', data)
+      if (response.ok && data.redirect) {
+        navigate(data.redirect)
+      } else if (!response.ok) {
+        alert(data.message || 'Registration failed')
+      }
     } catch (error) {
       console.error('Registration failed:', error)
     }
   }
+
+  const navigate = useNavigate()
 
   function handleGoogleButton() {
     console.log('google')

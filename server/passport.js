@@ -40,14 +40,13 @@ PassportRouter.post('/login', (req, res, next) => {
 });
 
 PassportRouter.post("/register",async (req,res)=>{
-    // const { email, password, typeuser } = req.body;
     const email = req.body.email;
     const password = req.body.password;
-    const typeuser = req.body.typeuser;
+    const typeuser = req.body.userType;
     try{
         const checkresult = await db.query();
         if(checkresult.rows.length > 0){
-            res.redirect("/login");
+            return res.json({redirect:"/login"});
         }else{
             bcrypt.hash(password,saltround,async(err,hash)=>{
                 if(err){
@@ -57,13 +56,14 @@ PassportRouter.post("/register",async (req,res)=>{
                     const user = result.rows[0];
                     req.login(user,(err)=>{
                         console.log("success");
-                        res.redirect("/home");
+                        return res.json({ success: true, redirect: "/home" });
                     });
                 }
             });
         }
     }catch(err){
-        console.log(err);
+        console.error(err);
+        return res.status(500).json({ success:false, message: 'Server error' });
     }
 });
 // PassportRouter.post("/login",(req,res)=>{
