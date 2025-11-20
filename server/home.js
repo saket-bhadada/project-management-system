@@ -11,3 +11,5 @@ homeRouter.get("/profile",async(req,res)=>{
         try{}catch(err){}
     }
 });
+
+export default homeRouter;
