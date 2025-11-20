@@ -40,7 +40,10 @@ PassportRouter.post('/login', (req, res, next) => {
 });
 
 PassportRouter.post("/register",async (req,res)=>{
-    const { email, password, typeuser } = req.body;
+    // const { email, password, typeuser } = req.body;
+    const email = req.body.email;
+    const password = req.body.password;
+    const typeuser = req.body.typeuser;
     try{
         const checkresult = await db.query();
         if(checkresult.rows.length > 0){

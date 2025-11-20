@@ -23,28 +23,28 @@ function Home() {
     loadMessages();
   }, []);
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    if (!newMessage.trim()) return;
-    try {
-      const response = await fetch(`/api/home`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: newMessage, email }),
-      });
-      if (response.ok) {
-        setNewMessage("");
-        setEmail("");
-        await loadMessages();
-      } else {
-        const err = await response.json().catch(() => ({ error: 'unknown' }));
-        alert(err.error || 'Failed to add message');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Failed to add message');
-    }
-  }
+  // async function handleSubmit(e) {
+  //   e.preventDefault();
+  //   if (!newMessage.trim()) return;
+  //   try {
+  //     const response = await fetch(`/api/home`, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ message: newMessage, email }),
+  //     });
+  //     if (response.ok) {
+  //       setNewMessage("");
+  //       setEmail("");
+  //       await loadMessages();
+  //     } else {
+  //       const err = await response.json().catch(() => ({ error: 'unknown' }));
+  //       alert(err.error || 'Failed to add message');
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //     alert('Failed to add message');
+  //   }
+  // }
 
   return (
     <>
