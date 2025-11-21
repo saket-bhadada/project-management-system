@@ -115,7 +115,7 @@ export default function Profile() {
                             placeholder="Write a message..."
                         ></textarea>
 
-                        <button onClick={handleAddMessage}>Add Message</button>
+                        <button onClick={addmessage}>Add Message</button>
                     </div>
 
                     {/* List messages */}

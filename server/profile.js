@@ -10,5 +10,11 @@ profileRouter.get("/profile",async(req,res)=>{
         res.redirect("/login");
     }
 });
+profileRouter.post("/messages",async(req,res)=>{
+    const msg = req.body;
+    const data = await db.query();
+    res.json({msg});
+});
+profileRouter.delete("/messages/:id",async(req,res)=>{});
 
 export default profileRouter;
