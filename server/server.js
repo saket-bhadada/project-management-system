@@ -7,7 +7,7 @@ import passport from "passport";
 import passportRouter from "./passport.js";
 import homeRouter from "./home.js";
 import profileRouter from "./profile.js";
-// import pg from "pg";
+import pg from "pg";
 // import { profile } from "console";
 
 // const __filename = fileURLToPath(import.meta.url);
@@ -22,6 +22,13 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(express.json());
 
+const db = new pg.Client({
+    user: "postgresql",
+    host: "localhost",
+    database:"PWS",
+    password:"Saket2006",
+    port:5432,
+})
 // Initialize passport middleware (no session store configured here)
 app.use(passport.initialize());
 
