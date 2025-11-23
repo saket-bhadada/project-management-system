@@ -3,12 +3,17 @@ import { Router } from "express";
 
 const homeRouter = express.Router();
 
-homeRouter.get("/profile",async(req,res)=>{
+homeRouter.get("/home",async(req,res)=>{
     if(!req.isAuthenticated){
         res.redirect("/login");
+        console.log("not logged in");
     }else{
-        res.json({user:req,user});
-        try{}catch(err){}
+        console.log("logged in");
+        res.json({user:req.user});
+        try{
+            const data = await db.query();
+            res.json(data);
+        }catch(err){}
     }
 });
 
