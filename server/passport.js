@@ -3,6 +3,7 @@ import passport from "passport";
 // import pg from "pg";
 import bcrypt, { hash } from "bcrypt";
 import { Strategy as LocalStrategy, Strategy } from "passport-local";
+import session from "express-session";
 
 // Temporary DB stub to avoid ReferenceError while DB is not configured.
 // Replace with a real DB connection (pg Pool) and proper queries.
@@ -16,6 +17,11 @@ const db = {
 // Create a new router object
 const PassportRouter = express.Router();
 const saltround = 10;
+
+// Middleware is already configured in server.js
+// PassportRouter.use(session({ ... }));
+// PassportRouter.use(passport.initialize());
+// PassportRouter.use(passport.session());
 
 // Define a GET route on this router
 PassportRouter.get("/",(req,res)=>{
@@ -66,17 +72,6 @@ PassportRouter.post("/register",async (req,res)=>{
         return res.status(500).json({ success:false, message: 'Server error' });
     }
 });
-// PassportRouter.post("/login",(req,res)=>{
-//     const {email,password}=req.body;
-//     console.log(email,password);
-//     res.json({ message: "User logged in successfully!" });
-//     try{
-
-//     }catch(err){
-//         console.error(err);
-//         res.status(500).json({ message: "Internal server error" });
-//     }
-// });
 
 passport.use(
     "local",
@@ -114,10 +109,5 @@ passport.serializeUser((user,cb)=>{
 passport.deserializeUser((user,cb)=>{
     cb(null,user);
 });
-// TODO: Add Passport.js strategies (Local, Google) here
 
-// TODO: Add registration and login routes here
-// router.post("/register", ...);
-
-// Export the router to be used in other parts of the application
 export default PassportRouter;

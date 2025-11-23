@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./home.css";
 import NavScrollExample from "./navbar.jsx";
 
@@ -6,13 +7,38 @@ function Home() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [email, setEmail] = useState("");
+  const navigate = useNavigate();
 
   async function loadMessages() {
     try {
       const response = await fetch(`/api/home`);
+      
+      // Check if redirected to login or unauthorized
+      if (response.redirected && response.url.includes('/login')) {
+         navigate('/login');
+         return;
+      }
+      if (response.status === 401 || response.status === 403) {
+          navigate('/login');
+          return;
+      }
+
       if (!response.ok) throw new Error(`Failed to load messages: ${response.status}`);
       const data = await response.json();
-      setMessages(Array.isArray(data) ? data : []);
+      // Check if the response contains a redirect instruction (custom)
+      if (data.redirect) {
+          navigate(data.redirect);
+          return;
+      }
+      
+      // Handle the response format from server (it might be { user: ..., message: ... } now)
+      if (data.user) {
+          // It's the user info response
+          // We don't have messages yet, so just set empty or handle accordingly
+          setMessages([]); 
+      } else {
+          setMessages(Array.isArray(data) ? data : []);
+      }
     } catch (error) {
       console.error("Error loading messages:", error);
       setMessages([]);

@@ -1,10 +1,15 @@
 import express from "express";
 import { Router } from "express";
+import db from "./db.js";
 
 const homeRouter = express.Router();
 
 homeRouter.get("/home",async(req,res)=>{
-    if(!req.isAuthenticated){
+    console.log("Checking auth...");
+    console.log("req.isAuthenticated type:", typeof req.isAuthenticated);
+    if(req.isAuthenticated) console.log("req.isAuthenticated is:", req.isAuthenticated.toString());
+
+    if(!req.isAuthenticated || !req.isAuthenticated()){
         res.redirect("/login");
         console.log("not logged in");
     }else{
@@ -13,7 +18,10 @@ homeRouter.get("/home",async(req,res)=>{
         try{
             const data = await db.query();
             res.json(data);
-        }catch(err){}
+        }catch(err){
+            console.log(err);
+            res.status(500).json({ message: "Internal server error" });
+        }
     }
 });
 
