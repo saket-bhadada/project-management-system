@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./profile.css";
 
 export default function Profile() {
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState();
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
 
@@ -20,6 +20,12 @@ export default function Profile() {
             if (data.success) {
                 setUser(data.user);
                 setMessages(data.messages);
+            } else {
+                console.error("Profile load failed:", data.message);
+                // If not authenticated, maybe redirect?
+                if (data.message === "Not authenticated") {
+                     window.location.href = "/login";
+                }
             }
         } catch (err) {
             console.error("Error loading profile", err);
