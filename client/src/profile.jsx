@@ -88,7 +88,7 @@ export default function Profile() {
                     </div>
 
                     <div className="type-of-user">
-                        <strong>User Type:</strong> {user.typeuser}
+                        <strong>User Type:</strong> {user.typeofuser}
                     </div>
                 </>
             ) : (
@@ -109,7 +109,7 @@ export default function Profile() {
             {/* ===========================
                 STAFF VIEW
             ============================ */}
-            {user?.typeuser === "staff" && (
+            {user?.typeofuser === "staff" && (
                 <>
                     <h3>My Messages</h3>
 
@@ -129,7 +129,7 @@ export default function Profile() {
                         {messages.length > 0 ? (
                             messages.map((msg) => (
                                 <div key={msg.id} className="message-item">
-                                    <p>{msg.message}</p>
+                                    <p>{msg.message_text}</p>
 
                                     {/* Delete only own messages */}
                                     <button

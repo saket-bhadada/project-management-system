@@ -63,7 +63,7 @@ function Registration() {
           required
         >
           <option value="student">Student</option>
-          <option value="staff">staff</option>
+          <option value="staff">taff</option>
         </select>
 
         <button type="submit" style={styles.button}>

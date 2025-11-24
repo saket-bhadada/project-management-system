@@ -83,7 +83,7 @@ function Home() {
         ) : (
           messages.map((msg) => (
             <div key={msg.id} className="project" style={{ marginBottom: 12, padding: 12, border: '1px solid #eee' }}>
-              <div className="message">{msg.message}</div>
+              <div className="message">{msg.message_text}</div>
               <div className="email">{msg.email}</div>
               <div className="time">{new Date(msg.created_at).toLocaleString()}</div>
             </div>
