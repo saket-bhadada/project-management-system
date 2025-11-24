@@ -14,10 +14,22 @@ homeRouter.get("/home",async(req,res)=>{
         console.log("not logged in");
     }else{
         console.log("logged in");
-        res.json({user:req.user});
         try{
-            const data = await db.query();
-            res.json(data);
+            const data = await db.query(`
+            SELECT 
+                m.id,
+                m.message_text,
+                m.created_at,
+                u.email AS author_name,
+                u.typeofuser
+            FROM message m
+            JOIN users u ON m.user_id = u.id
+            ORDER BY m.created_at DESC
+        `);
+            res.json({
+                user: req.user,
+                messages: data.rows
+            });
         }catch(err){
             console.log(err);
             res.status(500).json({ message: "Internal server error" });

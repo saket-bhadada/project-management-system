@@ -9,6 +9,8 @@ import homeRouter from "./home.js";
 import profileRouter from "./profile.js";
 import pg from "pg";
 import session from "express-session";
+import db from "./db.js";
+
 // import { profile } from "console";
 
 // const __filename = fileURLToPath(import.meta.url);
@@ -26,16 +28,25 @@ app.use(express.json());
 // Configure session middleware. In production, set a strong secret in env and
 // use a persistent session store (Redis, PG store, etc.). This MemoryStore
 // is fine for local development only.
-// const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-session-secret';
+const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-session-secret';
+app.use(session({
+    secret: SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        secure: false, // set to true when serving over HTTPS
+        sameSite: 'lax',
+    },
+}));
 
-
-const db = new pg.Client({
-    user: "postgres",
-    host: "localhost",
-    database:"PWS",
-    password:"Saket2006",
-    port:5432,
-})
+// const db = new pg.Client({
+//     user: "postgres",
+//     host: "localhost",
+//     database:"PWS",
+//     password:"Saket2006",
+//     port:5432,
+// })
 // Initialize passport middleware and enable persistent login sessions
 app.use(passport.initialize());
 app.use(passport.session());

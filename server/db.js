@@ -8,4 +8,6 @@ const db = new pg.Client({
     port:5432,
 });
 
+db.connect();
+
 export default db;
