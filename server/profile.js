@@ -48,13 +48,13 @@ profileRouter.post("/messages", async (req, res) => {
     }
 });
 
-profileRouter.delete("/message/:id", async (req, res) => {
+profileRouter.delete("/messages/:id", async (req, res) => {
     try {
         if (!(req.isAuthenticated && req.isAuthenticated())) {
             return res.status(401).json({ message: "Not authenticated" });
         }
 
-        if (req.user.role !== "staff") {
+        if (req.user.typeofuser !== "staff") {
             return res.status(403).json({ message: "Forbidden" });
         }
 

@@ -29,16 +29,17 @@ function Home() {
       if (data.redirect) {
           navigate(data.redirect);
           return;
-      }
-      
-      // Handle the response format from server (it might be { user: ..., message: ... } now)
-      if (data.user) {
-          // It's the user info response
-          // We don't have messages yet, so just set empty or handle accordingly
-          setMessages([]); 
-      } else {
-          setMessages(Array.isArray(data) ? data : []);
-      }
+        }
+
+        // Server returns { user, messages: [...] } when authenticated
+        if (data.messages && Array.isArray(data.messages)) {
+          setMessages(data.messages);
+        } else if (Array.isArray(data)) {
+          // fallback: server might return an array directly
+          setMessages(data);
+        } else {
+          setMessages([]);
+        }
     } catch (error) {
       console.error("Error loading messages:", error);
       setMessages([]);
