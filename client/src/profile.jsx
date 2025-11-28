@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./profile.css";
 
 export default function Profile() {
+    const navigate = useNavigate();
     const [user, setUser] = useState();
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
@@ -78,6 +80,7 @@ export default function Profile() {
 
     return (
         <div className="profile-container">
+            <button onClick={() => navigate('/home')} className="back-btn">← Back to Home</button>
             <h2>My Profile</h2>
 
             {/* USER DETAILS */}
