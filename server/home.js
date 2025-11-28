@@ -20,7 +20,7 @@ homeRouter.get("/home",async(req,res)=>{
                 m.id,
                 m.message_text,
                 m.created_at,
-                u.email AS author_name,
+                u.email,
                 u.typeofuser
             FROM message m
             JOIN users u ON m.user_id = u.id
