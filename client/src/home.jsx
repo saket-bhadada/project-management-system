@@ -2,11 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./home.css";
 import NavScrollExample from "./navbar.jsx";
+import ChatModal from "./ChatModal.jsx";
 
 function Home() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [email, setEmail] = useState("");
+  const [chatOpen, setChatOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
   const navigate = useNavigate();
 
   async function loadMessages() {
@@ -50,6 +53,18 @@ function Home() {
     loadMessages();
   }, []);
 
+  function handleMessageClick(userId, email) {
+    if (userId && email) {
+      setSelectedUser({ userId, email });
+      setChatOpen(true);
+    }
+  }
+
+  function closeChat() {
+    setChatOpen(false);
+    setSelectedUser(null);
+  }
+
   // async function handleSubmit(e) {
   //   e.preventDefault();
   //   if (!newMessage.trim()) return;
@@ -77,13 +92,18 @@ function Home() {
     <>
       <NavScrollExample />
       <div className="container">
-        <h2>All Messages</h2>
+        <h2>All Project</h2>
 
         {messages.length === 0 ? (
           <div>No messages yet.</div>
         ) : (
           messages.map((msg) => (
-            <div key={msg.id} className="project" style={{ marginBottom: 12, padding: 12, border: '1px solid #eee' }}>
+            <div 
+              key={msg.id} 
+              className="project" 
+              style={{ marginBottom: 12, padding: 12, border: '1px solid #eee', cursor: 'pointer' }}
+              onClick={() => handleMessageClick(msg.user_id, msg.email)}
+            >
               <div className="message">{msg.message_text}</div>
               <div className="email">{msg.email}</div>
               <div className="time">{new Date(msg.created_at).toLocaleString()}</div>
@@ -91,6 +111,15 @@ function Home() {
           ))
         )}
       </div>
+
+      {chatOpen && selectedUser && (
+        <ChatModal
+          isOpen={chatOpen}
+          onClose={closeChat}
+          userId={selectedUser.userId}
+          userEmail={selectedUser.email}
+        />
+      )}
     </>
   );
 }

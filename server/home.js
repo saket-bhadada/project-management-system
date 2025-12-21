@@ -20,6 +20,7 @@ homeRouter.get("/home",async(req,res)=>{
                 m.id,
                 m.message_text,
                 m.created_at,
+                m.user_id,
                 u.email,
                 u.typeofuser
             FROM message m

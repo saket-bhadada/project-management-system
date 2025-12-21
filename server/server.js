@@ -7,6 +7,7 @@ import passport from "passport";
 import passportRouter from "./passport.js";
 import homeRouter from "./home.js";
 import profileRouter from "./profile.js";
+import chatRouter from "./chat.js";
 import pg from "pg";
 import session from "express-session";
 import db from "./db.js";
@@ -40,21 +41,15 @@ app.use(session({
     },
 }));
 
-// const db = new pg.Client({
-//     user: "postgres",
-//     host: "localhost",
-//     database:"PWS",
-//     password:"Saket2006",
-//     port:5432,
-// })
+
 // Initialize passport middleware and enable persistent login sessions
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/api", passportRouter);
-// Mount home routes under /api so client can call /api/home and /api/messages
 app.use("/api", homeRouter);
 app.use("/api",profileRouter);
+app.use("/api", chatRouter);
 app.listen(3000,()=>{
     console.log('listening on port 3000');
 })
