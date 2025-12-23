@@ -7,7 +7,7 @@ import passport from "passport";
 import passportRouter from "./passport.js";
 import homeRouter from "./home.js";
 import profileRouter from "./profile.js";
-import chatRouter from "./chat.js";
+// import chatRouter from "./chat.js";
 import pg from "pg";
 import session from "express-session";
 import db from "./db.js";
@@ -49,7 +49,7 @@ app.use(passport.session());
 app.use("/api", passportRouter);
 app.use("/api", homeRouter);
 app.use("/api",profileRouter);
-app.use("/api", chatRouter);
+// app.use("/api", chatRouter);
 app.listen(3000,()=>{
     console.log('listening on port 3000');
 })
