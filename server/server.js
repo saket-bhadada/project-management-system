@@ -8,7 +8,7 @@ import passportRouter from "./passport.js";
 import homeRouter from "./home.js";
 import profileRouter from "./profile.js";
 // import chatRouter from "./chat.js";
-import pg from "pg";
+// import pg from "pg";
 import session from "express-session";
 import db from "./db.js";
 
