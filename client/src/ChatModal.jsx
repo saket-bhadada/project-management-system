@@ -1,6 +1,16 @@
 import React from "react";
 
 function chat(){
+
+    async function LoadMessage(){
+        try{
+            const response = await fetch(`/api/chat/${userid}`);
+            
+        }catch(error){
+            console.error("Error loading messages", error);
+            // setmessages([]);
+        }
+    }
     async function loadmessages(){
         try{
             const response = await fetch(`\api\chat${userid}`);
