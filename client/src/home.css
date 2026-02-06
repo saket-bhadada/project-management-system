@@ -98,16 +98,15 @@
   content: '🕒';
   font-size: 0.9rem;
 }
-
-/* Empty state */
-.container > div:first-of-type {
+/* .container > div:first-of-type*/
+.empty-state {
   text-align: center;
   padding: 3rem;
   color: var(--text-secondary);
   font-size: 1.1rem;
-}
+} 
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .container {
     width: 95%;
@@ -128,3 +127,9 @@
   }
 }
 
+.apply{
+  /* left: 0; */
+  position: absolute;
+  top: 0;
+  right: 0;
+}

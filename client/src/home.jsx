@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./home.css";
 import NavScrollExample from "./navbar.jsx";
-import ChatModal from "./ChatModal.jsx";
+// import ChatModal from "./ChatModal.jsx";
 
 function Home() {
   const [messages, setMessages] = useState([]);
@@ -10,6 +10,7 @@ function Home() {
   const [email, setEmail] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [apply,setapply] = useState([]);
   const navigate = useNavigate();
 
   async function loadMessages() {
@@ -49,6 +50,28 @@ function Home() {
     }
   }
 
+  async function handleApply(e, messageId, ownerId) {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      const response = await fetch(`/api/messages/${messageId}/apply`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user_id: ownerId })
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to apply: ${response.status}`);
+      }
+      const data = await response.json();
+      alert("Application submitted successfully!");
+      await loadMessages(); // Refresh the list
+    } catch (err) {
+      console.error("Error applying", err);
+      alert("Failed to apply. Please try again.");
+    }
+  }
   useEffect(() => {
     loadMessages();
   }, []);
@@ -95,7 +118,7 @@ function Home() {
         <h2>All Project</h2>
 
         {messages.length === 0 ? (
-          <div>No messages yet.</div>
+          <div className="empty-state">No messages yet.</div>
         ) : (
           messages.map((msg) => (
             <div 
@@ -107,6 +130,39 @@ function Home() {
               <div className="message">{msg.message_text}</div>
               <div className="email">{msg.email}</div>
               <div className="time">{new Date(msg.created_at).toLocaleString()}</div>
+              {/* <button 
+                className="apply"
+                onClick={(e) => handleApply(e, msg.id, msg.user_id)}
+              >
+                APPLY
+              </button> */}
+              {()=>{
+                switch(status){
+                  case "selected":
+                    return(
+                      <button
+                      className="apply-status"
+                      >
+                        SELECTED
+                      </button>
+                    );
+                    case "applied":
+                      return (
+                        <button className="btn-applied" disabled>
+                          ⏳ APPLIED
+                        </button>
+                      );
+                    default:
+                      return (
+                        <button 
+                          className="apply"
+                          onClick={(e) => handleApply(e, msg.id, msg.user_id)}
+                        >
+                          APPLY
+                        </button>
+                        );
+                }
+              }}
             </div>
           ))
         )}
