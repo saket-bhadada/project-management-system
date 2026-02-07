@@ -10,7 +10,6 @@ function Home() {
   const [email, setEmail] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [apply,setapply] = useState([]);
   const navigate = useNavigate();
 
   async function loadMessages() {
@@ -130,39 +129,31 @@ function Home() {
               <div className="message">{msg.message_text}</div>
               <div className="email">{msg.email}</div>
               <div className="time">{new Date(msg.created_at).toLocaleString()}</div>
-              {/* <button 
-                className="apply"
-                onClick={(e) => handleApply(e, msg.id, msg.user_id)}
-              >
-                APPLY
-              </button> */}
-              {()=>{
-                switch(status){
+              {(() => {
+                switch (msg.status) {
                   case "selected":
-                    return(
-                      <button
-                      className="apply-status"
-                      >
+                    return (
+                      <button className="apply-status apply" onClick={(e) => e.stopPropagation()}>
                         SELECTED
                       </button>
                     );
-                    case "applied":
-                      return (
-                        <button className="btn-applied" disabled>
-                          ⏳ APPLIED
-                        </button>
-                      );
-                    default:
-                      return (
-                        <button 
-                          className="apply"
-                          onClick={(e) => handleApply(e, msg.id, msg.user_id)}
-                        >
-                          APPLY
-                        </button>
-                        );
+                  case "applied":
+                    return (
+                      <button className="btn-applied apply" disabled onClick={(e) => e.stopPropagation()}>
+                        ⏳ APPLIED
+                      </button>
+                    );
+                  default:
+                    return (
+                      <button
+                        className="apply"
+                        onClick={(e) => handleApply(e, msg.id, msg.user_id)}
+                      >
+                        APPLY
+                      </button>
+                    );
                 }
-              }}
+              })()}
             </div>
           ))
         )}

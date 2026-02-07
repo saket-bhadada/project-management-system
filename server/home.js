@@ -37,5 +37,18 @@ homeRouter.get("/home",async(req,res)=>{
         }
     }
 });
-
+homeRouter.post("/messages/:messageId/apply",async(req,res)=>{
+    try{
+        if(!req.isAuthenticated || !req.isAuthenticated()){
+            return res.status(401).json({message:"Not authenticated"});
+        }
+        const messageId = req.params.messageId;
+        const userId = req.user.id;
+        console.log("message ID: ",messageId);
+        console.log("user ID: ",userId);
+    }catch(err){
+        console.log(err);
+        res.status(500).json({message:"Internal server error"});
+    }
+});
 export default homeRouter;
