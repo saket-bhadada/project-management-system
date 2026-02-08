@@ -18,7 +18,9 @@ function NavScrollExample() {
             navbarScroll
           >
             <Nav.Link as={Link} to="/profile">Profile</Nav.Link>
-            <Nav.Link href="#action2"> </Nav.Link>
+            {/* <Nav.Link href="#action2"> </Nav.Link> */}
+            <Nav.Link as={Link} to="/status">Status</Nav.Link>
+            <Nav.Link as={Link} to="/chats">Chats</Nav.Link>
           </Nav>
           {/* <Form className="d-flex">
             <Form.Control
