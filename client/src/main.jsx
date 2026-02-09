@@ -11,6 +11,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import Login from './login.jsx'
 import Registration from './registration.jsx'
 import Profile from './profile.jsx'
+import CurrentStatus from './status.jsx'
 // Nav bar is only shown on the home page now
 import Home from './home.jsx'
 
@@ -32,6 +33,7 @@ const router = createBrowserRouter([
       { path: 'login', element: <Login /> },
       { path: 'home', element: <Home /> },
       { path: 'profile', element: <Profile /> },
+      { path: 'status', element: <CurrentStatus /> },
     ],
   },
 ]);
