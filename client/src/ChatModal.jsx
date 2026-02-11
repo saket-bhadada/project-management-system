@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 function chat(){
-
+    const [messages, setMessages] = useState([]);
+    const [socket, setsocket] = useState(null);
     async function LoadMessage(){
         try{
             const response = await fetch(`/api/chat/${userid}`);
@@ -26,6 +27,29 @@ function chat(){
             console.log(clickid);
         }
     }
+    useEffect(()=>{
+        const newsocket = new WebSocket('ws://localhost:3001/chat');
+        setsocket(newsocket);
+        newsocket.onopen=()=>{
+            console.log("connected");        
+        };
+        newsocket.onmessage = (event) => {
+            // Ensure the message is received as a string
+            const message = event.data.toString();
+            setMessages((prevMessages) => [...prevMessages, message]);
+        };
+         newsocket.onclose = () => {
+            console.log('WebSocket connection closed');
+        };
+
+        newsocket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+
+        return () => {
+            newsocket.close();
+        };
+    })
     return(
         <div className="container">
             
