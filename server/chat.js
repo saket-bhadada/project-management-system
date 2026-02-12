@@ -1,12 +1,10 @@
-import express, { Router } from "express";
+import express from "express";
+import http from "http";
+import { WebSocket } from "http";
+import { Server } from "socket.io";
 
-chatRouter = Router.express();
+const server = http.createServer();
+const wsserver = new WebSocketServer();
+const homeRouter = express.Router();
 
-chatRouter.get("/api/chat/:userId",async(req,res)=>{
-    if(!req.isAuthenticated || !req.isAuthenticated()) return res.status(401).json({error:"not authenticated"});
-    try{
-    }catch(err){
-        console.error(err);
-        return res.status(500).json({error:"internal server error"});
-    }
-});
+wsserver.on("connection",(connection,request)=>{})
