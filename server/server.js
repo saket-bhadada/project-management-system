@@ -1,4 +1,5 @@
 import express from "express";
+import { createServer } from "http";
 import cors from "cors";
 import bodyParser from "body-parser";
 // import path from "path";
@@ -7,7 +8,7 @@ import passport from "passport";
 import passportRouter from "./passport.js";
 import homeRouter from "./home.js";
 import profileRouter from "./profile.js";
-// import chatRouter from "./chat.js";
+import setupChat from "./chat.js";
 // import pg from "pg";
 import session from "express-session";
 import db from "./db.js";
@@ -18,6 +19,7 @@ import db from "./db.js";
 // const __dirname = path.dirname(__filename);
 
 const app = express();
+const server = createServer(app);
 
 app.use(cors({
     origin: "http://localhost:5173",
@@ -50,7 +52,10 @@ app.use("/api", passportRouter);
 app.use("/api", homeRouter);
 app.use("/api",profileRouter);
 // app.use("/api", chatRouter);
-app.listen(3000,()=>{
+
+setupChat(server);
+
+server.listen(3000,()=>{
     console.log('listening on port 3000');
 })
 // connect to database (best effort)

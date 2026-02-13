@@ -1,26 +1,25 @@
-import { createServer } from "http";
 import { WebSocketServer } from "ws";
 import url from "url";
+import { v4 as uuidv4 } from "uuid";
 
-// Simple WebSocket server for raw WebSocket clients.
-// Listens on port 3001 and accepts connections on path `/chat`.
-const server = createServer();
+export default function setupChat(server) {
+    const wss = new WebSocketServer({ server, path: "/chat" });
 
-const wss = new WebSocketServer({ server, path: "/chat" });
+    wss.on("connection", (ws, req) => {
+        const { username } = url.parse(req.url || "", true).query || {};
+        const clientId = uuidv4();
+        ws.id = clientId;
+        console.log("WebSocket connected; username=", username);
+        console.log(clientId);
 
-wss.on("connection", (ws, req) => {
-    const { username } = url.parse(req.url || "", true).query || {};
-    console.log("WebSocket connected; username=", username);
+        ws.on("message", (message) => {
+            const text = message.toString();
+            console.log("received:", text);
+            // Echo the message back for now
+            ws.send(`Echo: ${text}`);
+        });
 
-    ws.on("message", (message) => {
-        const text = message.toString();
-        console.log("received:", text);
-        // Echo the message back for now
-        ws.send(`Echo: ${text}`);
+        ws.on("close", () => console.log("WebSocket closed"));
+        ws.on("error", (err) => console.error("WebSocket error:", err));
     });
-
-    ws.on("close", () => console.log("WebSocket closed"));
-    ws.on("error", (err) => console.error("WebSocket error:", err));
-});
-
-server.listen(3001, () => console.log("WebSocket server listening on port 3001"));
+}
