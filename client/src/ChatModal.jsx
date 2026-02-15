@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-function chat(){
+function chatmodule(){
     const [messages, setMessages] = useState([]);
     const [socket, setsocket] = useState(null);
     async function LoadMessage(){
@@ -27,6 +27,13 @@ function chat(){
             console.log(clickid);
         }
     }
+    function submit(e){
+        try{
+
+        }catch(error){
+            console.error("Error submitting message", error);
+        }
+    }
     useEffect(()=>{
         const newsocket = new WebSocket('ws://localhost:3001/chat');
         setsocket(newsocket);
@@ -49,10 +56,13 @@ function chat(){
         return () => {
             newsocket.close();
         };
-    })
+    },[username]);
     return(
         <div className="container">
-            
+            <p>{user_id}</p>
+            <input>message</input>
+            <button >send</button>
         </div>
     );
 }
+export default chatmodule;
