@@ -1,25 +1,45 @@
-import { WebSocketServer } from "ws";
-import url from "url";
+import { Server } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
 
 export default function setupChat(server) {
-    const wss = new WebSocketServer({ server, path: "/chat" });
+    const io = new Server(server, {
+        cors: {
+            origin: "http://localhost:5173",
+            credentials: true,
+        },
+        path: "/socket.io/",
+    });
 
-    wss.on("connection", (ws, req) => {
-        const { username } = url.parse(req.url || "", true).query || {};
+    io.on("connection", (socket) => {
+        const username = socket.handshake.query.username;
         const clientId = uuidv4();
-        ws.id = clientId;
-        console.log("WebSocket connected; username=", username);
-        console.log(clientId);
+        socket.id = clientId;
+        console.log("Socket.IO connected; username=", username, "clientId=", clientId);
 
-        ws.on("message", (message) => {
-            const text = message.toString();
-            console.log("received:", text);
-            // Echo the message back for now
-            ws.send(`Echo: ${text}`);
+        // Join a room based on username for targeted messaging
+        if (username) {
+            socket.join(`user-${username}`);
+        }
+
+        // Handle sending messages
+        socket.on("message", (data) => {
+            console.log("received message from", username, ":", data);
+            // Broadcast to all connected clients
+            io.emit("message", {
+                username,
+                message: data,
+                timestamp: new Date(),
+            });
         });
 
-        ws.on("close", () => console.log("WebSocket closed"));
-        ws.on("error", (err) => console.error("WebSocket error:", err));
+        // Handle disconnect
+        socket.on("disconnect", () => {
+            console.log("Socket.IO disconnected; username=", username);
+        });
+
+        // Handle errors
+        socket.on("error", (err) => {
+            console.error("Socket.IO error:", err);
+        });
     });
 }

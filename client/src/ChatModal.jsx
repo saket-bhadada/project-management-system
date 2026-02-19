@@ -1,68 +1,93 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { io } from "socket.io-client";
+import "./chat.css";
 
-function chatmodule(){
+function ChatModal({ username, userId }) {
     const [messages, setMessages] = useState([]);
-    const [socket, setsocket] = useState(null);
-    async function LoadMessage(){
-        try{
-            const response = await fetch(`/api/chat/${userid}`);
-            
-        }catch(error){
-            console.error("Error loading messages", error);
-            // setmessages([]);
-        }
-    }
-    async function loadmessages(){
-        try{
-            const response = await fetch(`\api\chat${userid}`);
-        }
-        catch(err){
-            console.error("Error loading messages", err);
-            setmessages([]);
-        }
-    }
-    function user_id(){
-        const handleclick = (event)=>{
-            const clickid = event.target.id;
-            console.log(clickid);
-        }
-    }
-    function submit(e){
-        try{
+    const [socket, setSocket] = useState(null);
+    const [inputValue, setInputValue] = useState("");
+    const [isConnected, setIsConnected] = useState(false);
 
-        }catch(error){
-            console.error("Error submitting message", error);
-        }
-    }
-    useEffect(()=>{
-        const newsocket = new WebSocket('ws://localhost:3001/chat');
-        setsocket(newsocket);
-        newsocket.onopen=()=>{
-            console.log("connected");        
-        };
-        newsocket.onmessage = (event) => {
-            // Ensure the message is received as a string
-            const message = event.data.toString();
-            setMessages((prevMessages) => [...prevMessages, message]);
-        };
-         newsocket.onclose = () => {
-            console.log('WebSocket connection closed');
-        };
+    useEffect(() => {
+        // Create socket connection with query parameter for username
+        const newSocket = io("http://localhost:3000", {
+            query: {
+                username: username || `user-${userId}`,
+            },
+        });
 
-        newsocket.onerror = (error) => {
-            console.error('WebSocket error:', error);
-        };
+        // Connection established
+        newSocket.on("connect", () => {
+            console.log("Connected to Socket.IO server");
+            setIsConnected(true);
+        });
 
+        // Receive messages
+        newSocket.on("message", (data) => {
+            console.log("Received message:", data);
+            setMessages((prevMessages) => [...prevMessages, data]);
+        });
+
+        // Connection closed
+        newSocket.on("disconnect", () => {
+            console.log("Disconnected from Socket.IO server");
+            setIsConnected(false);
+        });
+
+        // Error handling
+        newSocket.on("error", (error) => {
+            console.error("Socket.IO error:", error);
+        });
+
+        setSocket(newSocket);
+
+        // Cleanup: close socket on component unmount
         return () => {
-            newsocket.close();
+            newSocket.close();
         };
-    },[username]);
-    return(
-        <div className="container">
-            <p>{user_id}</p>
-            <input>message</input>
-            <button >send</button>
+    }, [username, userId]);
+
+    const handleSendMessage = (e) => {
+        e.preventDefault();
+        if (inputValue.trim() && socket && isConnected) {
+            socket.emit("message", inputValue);
+            setInputValue("");
+        } else if (!isConnected) {
+            console.warn("Socket not connected");
+        }
+    };
+
+    return (
+        <div className="chat-container">
+            <div className="chat-header">
+                <h3>Chat - {username || userId}</h3>
+                <span className={`status ${isConnected ? "connected" : "disconnected"}`}>
+                    {isConnected ? "●" : "○"} {isConnected ? "Connected" : "Disconnected"}
+                </span>
+            </div>
+            <div className="messages-list">
+                {messages.map((msg, index) => (
+                    <div key={index} className="message">
+                        <strong>{msg.username}:</strong> {msg.message}
+                        <span className="timestamp">{new Date(msg.timestamp).toLocaleTimeString()}</span>
+                    </div>
+                ))}
+            </div>
+            <form onSubmit={handleSendMessage} className="message-form">
+                <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    placeholder="Type a message..."
+                    disabled={!isConnected}
+                    className="message-input"
+                />
+                <button type="submit" disabled={!isConnected} className="send-button">
+                    Send
+                </button>
+            </form>
         </div>
     );
 }
-export default chatmodule;
+
+export default ChatModal;
