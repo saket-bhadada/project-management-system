@@ -1,5 +1,14 @@
-import http from 'http';
-import WebSocketServer from 'ws';
+import { WebSocketServer } from "ws";
+import url from "url";
 
-const server = http.createServer() //to take to http server
-const wsServer = new WebSocketServer({server})
+export default function setupChat(server) {
+  const wsServer = new WebSocketServer({
+    server,
+    path: "/chat",
+  });
+
+    wsServer.on("connection", (connection,request) => {
+        const username = url.parse(request.url, true).query.username;
+        console.log("New connection from user:", username);
+    });
+}
