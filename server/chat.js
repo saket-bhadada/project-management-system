@@ -8,7 +8,7 @@ export default function setupChat(server) {
   });
 
     wsServer.on("connection", (connection,request) => {
-        const username = url.parse(request.url, true).query.username;
+        const {username} = url.parse(request.url, true).query;
         console.log("New connection from user:", username);
-    });
+    }); 
 }

@@ -58,5 +58,7 @@ npx nodemon server.js
 >
 > Make sure you don’t accidentally point the HTTP service at the database port.
 > In particular, do **not** set `PORT=5432` when you only meant to configure
-> Postgres – use `DB_PORT` instead. The server will log a warning if it
-> attempts to connect the same database client object twice.
+> Postgres – use `DB_PORT` instead. The server now treats a `PORT` value as a
+> legacy DB port: if it sees `PORT` in your `.env` it will copy it into `DB_PORT`
+> and then delete it automatically to keep the web server from starting on the
+> wrong port.

@@ -52,7 +52,10 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use("/api/login", passportRouter);
+// passportRouter defines `/login` and `/register` itself, so mount it
+// at `/api` rather than `/api/login` (otherwise endpoints become
+// `/api/login/login` and never match client requests).
+app.use("/api", passportRouter);
 app.use("/api", homeRouter);
 app.use("/api",profileRouter);
 // app.use("/api", chatRouter);

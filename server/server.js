@@ -3,7 +3,8 @@ import db from "./db.js";
 
 // allow overriding the port via environment (useful for deployment or multiple local services)
 // avoid colliding with the database port variable, so the HTTP port prefers
-// SERVER_PORT before falling back to generic PORT.
+// SERVER_PORT before falling back to generic PORT.  default is 3000 so it doesn’t
+// conflict with the React development server.
 export const PORT = process.env.SERVER_PORT || process.env.PORT || 3000;
 
 // Start server (ONLY PLACE where listen is called)
