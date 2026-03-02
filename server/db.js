@@ -8,10 +8,10 @@ dotenv.config();
 // `PORT`, which conflicted with the HTTP server.  If the maintainer accidentally
 // set `PORT` in their .env, migrate it into `DB_PORT` and then delete it so the
 // web service doesn’t pick it up later.
-if (process.env.PORT && !process.env.DB_PORT) {
-    process.env.DB_PORT = process.env.PORT;
-    delete process.env.PORT;
-}
+// if (process.env.PORT && !process.env.DB_PORT) {
+//     process.env.DB_PORT = process.env.PORT;
+//     delete process.env.PORT;
+// }
 
 const db = new pg.Client({
     user: process.env.DB_USER || process.env.USER,

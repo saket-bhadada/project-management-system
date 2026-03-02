@@ -8,6 +8,14 @@ import db from "./db.js";
 export const PORT = process.env.SERVER_PORT || process.env.PORT || 3000;
 
 // Start server (ONLY PLACE where listen is called)
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use. Please stop the other process running on this port.`);
+    process.exit(1);
+  }
+  throw err;
+});
+
 server.listen(PORT, () => {
   console.log(`HTTP Server running on http://localhost:${PORT}`);
   console.log(`WebSocket running on ws://localhost:${PORT}/chat`);
