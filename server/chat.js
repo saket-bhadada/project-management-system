@@ -20,18 +20,23 @@ export default function setupChat(server) {
         const uuid = uuidv4();
         console.log(`New connection from user: ${username} (UUID: ${uuid})`);
         connections[uuid] = connection;
-
-        users[uuid]={
+        connection.on("message",(message)=>{
+          const messsageString = data.toString();
+          try {
+        const parsed = JSON.parse(messageString);
+        
+        // Now you can update your users object
+        users[uuid] = {
           username: username,
-          // message:request.body?.message || "",
-          message:parsed.message || "",
-          uuid:uuid
-        }
-        if(users[uuid].message){
-          console.log("message is",users[uuid].message);
-        }else{
-          console.log("no message");
-        }
+          message: parsed.message || "",
+          uuid: uuid
+        };
+
+        console.log(`Message from ${username}:`, users[uuid].message);
+      } catch (err) {
+        console.log("Received non-JSON message:", messageString);
+      }
+        });
         // console.log("current message is",users[uuid].message);
         // console.log("New connection from user:", username);
     }); 
