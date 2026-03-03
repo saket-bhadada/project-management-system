@@ -23,9 +23,16 @@ export default function setupChat(server) {
 
         users[uuid]={
           username: username,
-          message:request.body?.message || "",
+          // message:request.body?.message || "",
+          message:parsed.message || "",
           uuid:uuid
         }
+        if(users[uuid].message){
+          console.log("message is",users[uuid].message);
+        }else{
+          console.log("no message");
+        }
+        // console.log("current message is",users[uuid].message);
         // console.log("New connection from user:", username);
     }); 
 }
