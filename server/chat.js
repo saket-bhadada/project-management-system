@@ -12,7 +12,11 @@ export default function setupChat(server) {
   const connections = { };
   const users = { };
 
-    wsServer.on("connection", (connection,request) => {
+  const handlemessage = (message,username,uuid) => {};
+  const handleclose = (uuid) => {}
+
+    wsServer.on("connection", 
+      (connection,request) => {
         // const requestUrl = new URL(request.url, `http://${request.headers.host || 'localhost'}`);
         // const username = requestUrl.searchParams.get("username");
         const requestUrl = url.parse(request.url, true); // 'true' parses the query string into an object
@@ -20,24 +24,26 @@ export default function setupChat(server) {
         const uuid = uuidv4();
         console.log(`New connection from user: ${username} (UUID: ${uuid})`);
         connections[uuid] = connection;
-        connection.on("message",(message)=>{
-          const messsageString = data.toString();
-          try {
-        const parsed = JSON.parse(messageString);
+        connection.on("message",(message)=>handlemessage(message,username,uuid));
+        connection.on("close",()=>handleclose(uuid));
+      //     const messageString = data.toString();
+      //     try {
+      //   const parsed = JSON.parse(messageString);
         
-        // Now you can update your users object
-        users[uuid] = {
-          username: username,
-          message: parsed.message || "",
-          uuid: uuid
-        };
+      //   // Now you can update your users object
+      //   users[uuid] = {
+      //     username: username,
+      //     message: parsed.message || "",
+      //     uuid: uuid
+      //   };
 
-        console.log(`Message from ${username}:`, users[uuid].message);
-      } catch (err) {
-        console.log("Received non-JSON message:", messageString);
-      }
-        });
+      //   console.log(`Message from ${username}:`, users[uuid].message);
+      // } catch (err) {
+      //   console.log("Received non-JSON message:", messageString);
+      // }
+      //   }
         // console.log("current message is",users[uuid].message);
         // console.log("New connection from user:", username);
     }); 
+    wsServer.on("close",()=>handleclose(uuid));
 }
