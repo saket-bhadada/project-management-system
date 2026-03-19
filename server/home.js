@@ -1,4 +1,4 @@
-import express from "express";
+import express, { application } from "express";
 import { Router } from "express";
 import db from "./db.js";
 
@@ -51,6 +51,18 @@ homeRouter.post("/messages/:messageId/apply",async(req,res)=>{
         if(ownerId === userId){
             return res.status(403).json({message:"You cannot apply to your own message"});
         }
+        const applicationResult = await db.query(`
+            insert into application (message_id,applicant_id)
+            values ($1,$2)
+            on conflict (message_id,applicant_id)
+            do Update set updated_at = now(),
+            returning *`,
+        [messageId,userId]
+    );
+        res.status(201).json({
+            success: true,
+            application:applicationResult.rows[0]
+        })
     }catch(err){
         console.log(err);
         res.status(500).json({message:"Internal server error"});
