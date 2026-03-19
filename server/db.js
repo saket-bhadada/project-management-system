@@ -25,3 +25,19 @@ const db = new pg.Client({
 
 // connection is triggered from server.js to allow retry logic / logging
 export default db;
+
+// Ensures required tables exist in the database. This is safe to call on each
+// startup and will not destroy existing data.
+export async function initSchema() {
+    await db.query(`
+        CREATE TABLE IF NOT EXISTS application (
+            id SERIAL PRIMARY KEY,
+            message_id INTEGER NOT NULL REFERENCES message(id) ON DELETE CASCADE,
+            applicant_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            status TEXT NOT NULL DEFAULT 'pending',
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            UNIQUE (message_id, applicant_id)
+        );
+    `);
+}

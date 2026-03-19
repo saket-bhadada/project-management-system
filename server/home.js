@@ -44,8 +44,13 @@ homeRouter.post("/messages/:messageId/apply",async(req,res)=>{
         }
         const messageId = req.params.messageId;
         const userId = req.user.id;
-        console.log("message ID: ",messageId);
-        console.log("user ID: ",userId);
+        const messageResult = await db.query("SELECT user_id FROM message WHERE id = $1", [messageId]);
+        const ownerId = messageResult.rows[0].user_id;
+        // console.log("message ID: ",messageId);
+        // console.log("user ID: ",userId);
+        if(ownerId === userId){
+            return res.status(403).json({message:"You cannot apply to your own message"});
+        }
     }catch(err){
         console.log(err);
         res.status(500).json({message:"Internal server error"});

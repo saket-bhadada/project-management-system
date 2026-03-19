@@ -1,5 +1,5 @@
 import { server } from "./index.js";
-import db from "./db.js";
+import db, { initSchema } from "./db.js";
 
 // allow overriding the port via environment (useful for deployment or multiple local services)
 // avoid colliding with the database port variable, so the HTTP port prefers
@@ -22,4 +22,13 @@ server.listen(PORT, () => {
 });
 
 // connect to database (best effort)
-db.connect().catch(err => console.warn('DB connect warning:', err.message || err));
+db.connect()
+  .then(async () => {
+    try {
+      await initSchema();
+      console.log('Database schema initialized.');
+    } catch (err) {
+      console.warn('DB schema init warning:', err.message || err);
+    }
+  })
+  .catch(err => console.warn('DB connect warning:', err.message || err));
