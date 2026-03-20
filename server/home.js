@@ -68,4 +68,19 @@ homeRouter.post("/messages/:messageId/apply",async(req,res)=>{
         res.status(500).json({message:"Internal server error"});
     }
 });
+homeRouter.get("/messages/:messageId/applications",async(req,res)=>{
+    try{
+        if(!req.isAuthenticated || !req.isAuthenticated()){
+            return res.status(401).json({message:"Not authenticated"});
+        }
+        const messageId = req.params.messageId;
+        const messageResult = await db.query(
+            "select user_id from message where id = $1",
+            [messageId]
+        )
+    }catch(err){
+        console.log(err);
+        res.status(500).json({message:"Internal server error"});
+    }
+});
 export default homeRouter;
