@@ -150,6 +150,12 @@
   opacity: 0.95;
 }
 
+.btn-rejected{
+  background: #dc3545;
+  cursor: default;
+  opacity: 0.95;
+}
+
 /* Basic styles for ChatModal (simple fallback) */
 .chat-modal-backdrop{
   position: fixed;

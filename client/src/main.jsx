@@ -12,6 +12,7 @@ import Login from './login.jsx'
 import Registration from './registration.jsx'
 import Profile from './profile.jsx'
 import CurrentStatus from './status.jsx'
+import Applications from './applications.jsx'
 // import ChatModule from './ChatModal.jsx'
 // Nav bar is only shown on the home page now
 import Home from './home.jsx'
@@ -35,6 +36,7 @@ const router = createBrowserRouter([
       { path: 'home', element: <Home /> },
       { path: 'profile', element: <Profile /> },
       { path: 'status', element: <CurrentStatus /> },
+      { path: 'applications', element: <Applications /> },
       // { path: 'chats', element: <ChatModule /> },
     ],
   },

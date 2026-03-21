@@ -10,11 +10,14 @@ function Home() {
   const [email, setEmail] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [userApplications, setUserApplications] = useState({});
   const navigate = useNavigate();
 
   async function loadMessages() {
     try {
-      const response = await fetch(`/api/home`);
+      const response = await fetch(`/api/home`, {
+        credentials: "include",
+      });
       
       // Check if redirected to login or unauthorized
       if (response.redirected && response.url.includes('/login')) {
@@ -49,6 +52,31 @@ function Home() {
     }
   }
 
+  async function loadUserApplications() {
+    try {
+      const response = await fetch(`/api/apply`, {
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        console.warn("Failed to load user applications");
+        return;
+      }
+
+      const applications = await response.json();
+      // Create a map of messageId -> application status
+      const appMap = {};
+      if (Array.isArray(applications)) {
+        applications.forEach(app => {
+          appMap[app.message_id] = app.status;
+        });
+      }
+      setUserApplications(appMap);
+    } catch (error) {
+      console.error("Error loading user applications:", error);
+    }
+  }
+
   async function handleApply(e, messageId, ownerId) {
     e.preventDefault();
     e.stopPropagation();
@@ -58,6 +86,7 @@ function Home() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({ user_id: ownerId })
       });
       if (!response.ok) {
@@ -66,6 +95,7 @@ function Home() {
       const data = await response.json();
       alert("Application submitted successfully!");
       await loadMessages(); // Refresh the list
+      await loadUserApplications(); // Reload user's applications to update status
     } catch (err) {
       console.error("Error applying", err);
       alert("Failed to apply. Please try again.");
@@ -73,6 +103,7 @@ function Home() {
   }
   useEffect(() => {
     loadMessages();
+    loadUserApplications();
   }, []);
 
   function handleMessageClick(userId, email) {
@@ -130,25 +161,32 @@ function Home() {
               <div className="email">{msg.email}</div>
               <div className="time">{new Date(msg.created_at).toLocaleString()}</div>
               {(() => {
-                switch (msg.status) {
-                  case "selected":
-                    return (
-                      <button className="apply-status apply" onClick={(e) => e.stopPropagation()}>
-                        SELECTED
-                      </button>
-                    );
-                  case "applied":
-                    return (
-                      <button className="btn-applied apply" disabled onClick={(e) => e.stopPropagation()}>
-                        ⏳ APPLIED
-                      </button>
-                    );
-                  default:
-                    return (
-                      <button
-                        className="apply"
-                        onClick={(e) => handleApply(e, msg.id, msg.user_id)}
-                      >
+                const appStatus = userApplications[msg.id];
+                
+                if (appStatus === "approved" || appStatus === "selected") {
+                  return (
+                    <button className="apply-status apply" onClick={(e) => e.stopPropagation()}>
+                      ✓ SELECTED
+                    </button>
+                  );
+                } else if (appStatus === "pending") {
+                  return (
+                    <button className="btn-applied apply" disabled onClick={(e) => e.stopPropagation()}>
+                      ⏳ APPLIED
+                    </button>
+                  );
+                } else if (appStatus === "rejected") {
+                  return (
+                    <button className="btn-rejected apply" disabled onClick={(e) => e.stopPropagation()}>
+                      ✗ REJECTED
+                    </button>
+                  );
+                } else {
+                  return (
+                    <button
+                      className="apply"
+                      onClick={(e) => handleApply(e, msg.id, msg.user_id)}
+                    >
                         APPLY
                       </button>
                     );

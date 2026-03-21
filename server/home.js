@@ -43,8 +43,11 @@ homeRouter.post("/messages/:messageId/apply",async(req,res)=>{
             return res.status(401).json({message:"Not authenticated"});
         }
         const messageId = req.params.messageId;
-        const userId = req.user.id;
+        const userId = req.user?.id;
         const messageResult = await db.query("SELECT user_id FROM message WHERE id = $1", [messageId]);
+        if(messageResult.rows.length === 0){
+            return res.status(404).json({message:"Message not found"});
+        }
         const ownerId = messageResult.rows[0].user_id;
         // console.log("message ID: ",messageId);
         // console.log("user ID: ",userId);
@@ -55,13 +58,17 @@ homeRouter.post("/messages/:messageId/apply",async(req,res)=>{
             insert into application (message_id,applicant_id)
             values ($1,$2)
             on conflict (message_id,applicant_id)
-            do Update set updated_at = now(),
+            do update set updated_at = now()
             returning *`,
         [messageId,userId]
     );
-        res.status(201).json({
+        // res.json({
+        //     success: true,
+        //     application:applicationResult.rows[0]
+        // })
+        res.json({
             success: true,
-            application:applicationResult.rows[0]
+            message: "Application submitted successfully!"
         })
     }catch(err){
         console.log(err);
@@ -77,7 +84,22 @@ homeRouter.get("/messages/:messageId/applications",async(req,res)=>{
         const messageResult = await db.query(
             "select user_id from message where id = $1",
             [messageId]
-        )
+        );
+        if(messageResult.rows.length === 0){
+            return res.status(404).json({message:"Message not found"});
+        }
+        const ownerId = messageResult.rows[0].user_id;
+        if(ownerId !== req.user.id){
+            return res.status(403).json({message:"You are not the owner of this message"});
+        }
+        const applicants = await db.query(
+            `select a.id, a.status, a.created_at, u.id as applicant_id, u.email as applicant_email
+            from application a 
+            join users u on a.applicant_id = u.id
+            where a.message_id = $1`,
+            [messageId]
+        );
+        res.json(applicants.rows);
     }catch(err){
         console.log(err);
         res.status(500).json({message:"Internal server error"});
