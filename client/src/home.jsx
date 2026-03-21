@@ -64,6 +64,7 @@ function Home() {
       }
 
       const applications = await response.json();
+      console.log("User applications:", applications); // Debug log
       // Create a map of messageId -> application status
       const appMap = {};
       if (Array.isArray(applications)) {
@@ -71,6 +72,7 @@ function Home() {
           appMap[app.message_id] = app.status;
         });
       }
+      console.log("Application map:", appMap); // Debug log
       setUserApplications(appMap);
     } catch (error) {
       console.error("Error loading user applications:", error);

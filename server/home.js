@@ -105,4 +105,27 @@ homeRouter.get("/messages/:messageId/applications",async(req,res)=>{
         res.status(500).json({message:"Internal server error"});
     }
 });
+
+homeRouter.get("/apply",async(req,res)=>{
+    try{
+        if(!req.isAuthenticated || !req.isAuthenticated()){
+            return res.status(401).json({message:"Not authenticated"});
+        }
+        const userId = req.user.id;
+        const applications = await db.query(
+            `select a.id, a.message_id, a.status, a.created_at, m.message_text, u.email
+            from application a
+            join message m on a.message_id = m.id
+            join users u on m.user_id = u.id
+            where a.applicant_id = $1
+            order by a.created_at desc`,
+            [userId]
+        );
+        res.json(applications.rows);
+    }catch(err){
+        console.log(err);
+        res.status(500).json({message:"Internal server error"});
+    }
+});
+
 export default homeRouter;
