@@ -62,10 +62,12 @@ homeRouter.post("/messages/:messageId/apply",async(req,res)=>{
             return res.status(403).json({ message: "You cannot apply to your own message" });
         }
 
-        if (ownerType === "staff") {
-            return res.status(403).json({ message: "Cannot apply to staff-owned messages" });
-        }
+        // Option A: disallow applications if the message owner is staff
+        // if (ownerType === "staff") {
+        //     return res.status(403).json({ message: "Cannot apply to staff-owned messages" });
+        // }
 
+        // Option B: disallow staff users from applying to any message
         if (req.user?.typeofuser === "staff") {
             return res.status(403).json({ message: "Staff cannot apply to messages" });
         }

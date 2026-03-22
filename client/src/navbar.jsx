@@ -44,7 +44,9 @@ function NavScrollExample() {
           >
             <Nav.Link as={Link} to="/profile">Profile</Nav.Link>
             {/* <Nav.Link href="#action2"> </Nav.Link> */}
-            <Nav.Link as={Link} to="/status">Status</Nav.Link>
+            {!loading && user?.typeofuser !== "staff" && (
+              <Nav.Link as={Link} to="/status">Status</Nav.Link>
+            )}
             {!loading && user?.typeofuser === "staff" && (
               <Nav.Link as={Link} to="/applications">Applications</Nav.Link>
             )}
