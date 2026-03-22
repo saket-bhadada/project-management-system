@@ -44,15 +44,30 @@ homeRouter.post("/messages/:messageId/apply",async(req,res)=>{
         }
         const messageId = req.params.messageId;
         const userId = req.user?.id;
-        const messageResult = await db.query("SELECT user_id FROM message WHERE id = $1", [messageId]);
-        if(messageResult.rows.length === 0){
-            return res.status(404).json({message:"Message not found"});
+        const messageResult = await db.query(
+            `SELECT m.user_id, u.typeofuser AS owner_type
+             FROM message m
+             JOIN users u ON m.user_id = u.id
+             WHERE m.id = $1`,
+            [messageId]
+        );
+        if (messageResult.rows.length === 0) {
+            return res.status(404).json({ message: "Message not found" });
         }
+
         const ownerId = messageResult.rows[0].user_id;
-        // console.log("message ID: ",messageId);
-        // console.log("user ID: ",userId);
-        if(ownerId === userId){
-            return res.status(403).json({message:"You cannot apply to your own message"});
+        const ownerType = messageResult.rows[0].owner_type;
+
+        if (ownerId === userId) {
+            return res.status(403).json({ message: "You cannot apply to your own message" });
+        }
+
+        if (ownerType === "staff") {
+            return res.status(403).json({ message: "Cannot apply to staff-owned messages" });
+        }
+
+        if (req.user?.typeofuser === "staff") {
+            return res.status(403).json({ message: "Staff cannot apply to messages" });
         }
         const applicationResult = await db.query(`
             insert into application (message_id,applicant_id)
@@ -62,14 +77,14 @@ homeRouter.post("/messages/:messageId/apply",async(req,res)=>{
             returning *`,
         [messageId,userId]
     );
-        // res.json({
-        //     success: true,
-        //     application:applicationResult.rows[0]
-        // })
         res.json({
             success: true,
-            message: "Application submitted successfully!"
+            application:applicationResult.rows[0]
         })
+        // res.json({
+        //     success: true,
+        //     message: "Application submitted successfully!"
+        // })
     }catch(err){
         console.log(err);
         res.status(500).json({message:"Internal server error"});
