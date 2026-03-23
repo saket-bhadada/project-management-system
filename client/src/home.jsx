@@ -149,6 +149,25 @@ function Home() {
       alert("Failed to apply. Please try again.");
     }
   }
+  async function handleupdateApplication(applicationId,newStatus){
+    try{
+      const response = await fetch(`/api/applications/${applicationId}/status`,
+        {
+          method:"PUT",
+          headers:{"Content-Type":"application/json"},
+          credentials:"include",
+          body:JSON.stringify({status:newStatus})
+        }
+      );
+      if(!response.ok){
+        throw new Error(`failed to update application status`)
+      }
+
+    }catch(err){
+      console.error("Error updating application status", err);
+      alert("Failed to update application status. Please try again.");
+    }
+  }
   useEffect(() => {
     loadMessages();
     loadUserApplications();
