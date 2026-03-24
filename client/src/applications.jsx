@@ -90,6 +90,36 @@ function Applications() {
         }
     }
 
+    // Update application status
+    async function handleupdateApplication(applicationId, newStatus) {
+        try {
+            const response = await fetch(`/api/applications/${applicationId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({ status: newStatus }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update application status');
+            }
+
+            // Update local state
+            const updatedApplicants = Object.keys(applicantsByMessage).reduce((acc, messageId) => {
+                acc[messageId] = applicantsByMessage[messageId].map((app) =>
+                    app.id === applicationId ? { ...app, status: newStatus } : app
+                );
+                return acc;
+            }, {});
+            setApplicantsByMessage(updatedApplicants);
+        } catch (err) {
+            console.error('Error updating application:', err);
+            alert('Failed to update application status');
+        }
+    }
+
     if (loading) {
         return (
             <div>
@@ -147,13 +177,22 @@ function Applications() {
                                                             <p>
                                                                 <strong>Email:</strong> {applicant.applicant_email}
                                                             </p>
-                                                            <p>
+                                                            <p style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                                 <strong>Status:</strong>
                                                                 <span
                                                                     className={`status-badge status-${applicant.status}`}
                                                                 >
                                                                     {applicant.status}
                                                                 </span>
+                                                                <select
+                                                                    value={applicant.status}
+                                                                    onChange={(e) => handleupdateApplication(applicant.id, e.target.value)}
+                                                                    style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid #ccc', cursor: 'pointer' }}
+                                                                >
+                                                                    <option value="pending">pending</option>
+                                                                    <option value="accepted">accepted</option>
+                                                                    <option value="rejected">rejected</option>
+                                                                </select>
                                                             </p>
                                                             <p className="applied-date">
                                                                 Applied: {new Date(applicant.created_at).toLocaleDateString()}

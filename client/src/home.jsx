@@ -149,25 +149,29 @@ function Home() {
       alert("Failed to apply. Please try again.");
     }
   }
-  async function handleupdateApplication(applicationId,newStatus){
-    try{
-      const response = await fetch(`/api/applications/${applicationId}/status`,
-        {
-          method:"PUT",
-          headers:{"Content-Type":"application/json"},
-          credentials:"include",
-          body:JSON.stringify({status:newStatus})
-        }
-      );
-      if(!response.ok){
-        throw new Error(`failed to update application status`)
-      }
-
-    }catch(err){
-      console.error("Error updating application status", err);
-      alert("Failed to update application status. Please try again.");
-    }
-  }
+  // async function handleupdateApplication(applicationId,newStatus){
+  //   try{
+  //     const response = await fetch(`/api/applications/${applicationId}/status`,
+  //       {
+  //         method:"PUT",
+  //         headers:{"Content-Type":"application/json"},
+  //         credentials:"include",
+  //         body:JSON.stringify({status:newStatus})
+  //       }
+  //     );
+  //     if(!response.ok){
+  //       throw new Error(`failed to update application status`)
+  //     }
+  //     const data = await response.json();
+  //     alert(`Application status updated to ${data.status}`);
+  //     await loadAllApplicants();
+  //     await loadUserApplications();
+  //     await loadMessages();
+  //   }catch(err){
+  //     console.error("Error updating application status", err);
+  //     alert("Failed to update application status. Please try again.");
+  //   }
+  // }
   useEffect(() => {
     loadMessages();
     loadUserApplications();
@@ -242,7 +246,9 @@ function Home() {
                         {applicantsByMessage[msg.id].map((app) => (
                           <div key={app.id} style={{ padding: 8, backgroundColor: '#f5f5f5', marginBottom: 8, borderRadius: 4 }}>
                             <div><strong>Email:</strong> {app.applicant_email}</div>
-                            <div><strong>Status:</strong> <span style={{ color: app.status === "pending" ? "orange" : app.status === "approved" ? "green" : "red" }}>{app.status}</span></div>
+                            <div><strong>Status:</strong> <span 
+                            style={{ color: app.status === "pending" ? "orange" : app.status === "approved" ? "green" : "red" }}
+                            >{app.status}</span></div>
                             <div><strong>Applied:</strong> {new Date(app.created_at).toLocaleString()}</div>
                           </div>
                         ))}
