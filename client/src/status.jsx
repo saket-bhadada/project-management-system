@@ -48,7 +48,7 @@ function CurrentStatus() {
                     <div key={apl.id} style={{ padding: "15px", border: "1px solid #ddd", marginBottom: "10px", borderRadius: "4px" }}>
                         <div><strong>Message:</strong> {apl.message_text}</div>
                         <div><strong>Email:</strong> {apl.email}</div>
-                        <div><strong>Status:</strong> <span style={{ fontWeight: "bold", color: apl.status === "approved" ? "green" : apl.status === "rejected" ? "red" : "orange" }}>{apl.status}</span></div>
+                        <div><strong>Status:</strong> <span style={{ fontWeight: "bold", color: apl.status === "accepted" ? "green" : apl.status === "rejected" ? "red" : "orange" }}>{apl.status}</span></div>
                     </div>
                 ))
             )}

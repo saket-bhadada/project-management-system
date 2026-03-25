@@ -247,7 +247,7 @@ function Home() {
                           <div key={app.id} style={{ padding: 8, backgroundColor: '#f5f5f5', marginBottom: 8, borderRadius: 4 }}>
                             <div><strong>Email:</strong> {app.applicant_email}</div>
                             <div><strong>Status:</strong> <span 
-                            style={{ color: app.status === "pending" ? "orange" : app.status === "approved" ? "green" : "red" }}
+                            style={{ color: app.status === "pending" ? "orange" : app.status === "accepted" ? "green" : "red" }}
                             >{app.status}</span></div>
                             <div><strong>Applied:</strong> {new Date(app.created_at).toLocaleString()}</div>
                           </div>
@@ -281,9 +281,9 @@ function Home() {
                   {(() => {
                     const appStatus = userApplications[msg.id];
                     
-                    if (appStatus === "approved" || appStatus === "selected") {
+                    if (appStatus === "accepted" || appStatus === "selected") {
                       return (
-                        <button className="apply-status apply" onClick={(e) => e.stopPropagation()}>
+                        <button className="apply-status apply" disabled onClick={(e) => e.stopPropagation()}>
                           ✓ SELECTED
                         </button>
                       );

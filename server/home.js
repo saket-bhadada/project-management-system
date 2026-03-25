@@ -144,21 +144,20 @@ homeRouter.get("/apply",async(req,res)=>{
         res.status(500).json({message:"Internal server error"});
     }
 });
-homeRouter.put("/aaplications/:applicationId/status",async(req,res)=>{
+homeRouter.put("/applications/:applicationId/status",async(req,res)=>{
     try{
         if(!req.isAuthenticated|| !req.isAuthenticated()){
-            redirect("/login");
             return res.status(401).json({message:"Not authenticated"});
         }
 
         const applicationId = req.params.applicationId;
         const newStatus = req.body.status;
         if(newStatus !== "pending" && newStatus !== "accepted" && newStatus !== "rejected"){
-            response.json({message:"invalid status value"});
+            res.status(400).json({message:"invalid status value"});
             return;
         }
         const applicationResult = await db.query(
-            "update application set status = $1, update_at = now() where id = $2, returning *",
+            "update application set status = $1, updated_at = now() where id = $2 returning *",
             [newStatus,applicationId]
         );
         res.json(applicationResult.rows[0]);
