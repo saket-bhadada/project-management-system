@@ -139,8 +139,14 @@
   cursor: pointer;
   font-weight: 600;
 }
+.apply:hover {
+  background: var(--primary-color);
+}
 
 .apply-status{
+  background: #28a745;
+}
+.apply-status:hover {
   background: #28a745;
 }
 
@@ -149,11 +155,17 @@
   cursor: default;
   opacity: 0.95;
 }
+.btn-applied:hover {
+  background: #6c757d;
+}
 
 .btn-rejected{
   background: #dc3545;
   cursor: default;
   opacity: 0.95;
+}
+.btn-rejected:hover {
+  background: #dc3545;
 }
 
 /* Basic styles for ChatModal (simple fallback) */
@@ -176,4 +188,6 @@
 }
 .chat-header{display:flex;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #eee}
 .chat-body{padding:16px}
-.close-btn{background:none;border:0;font-size:18px;cursor:pointer}
+.close-btn{background:none;border:0;font-size:18px;
+  cursor:pointer
+}

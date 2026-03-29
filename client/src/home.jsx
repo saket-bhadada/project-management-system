@@ -272,7 +272,7 @@ function Home() {
                 <div 
                   key={msg.id} 
                   className="project" 
-                  style={{ marginBottom: 12, padding: 12, border: '1px solid #eee', cursor: 'pointer' }}
+                  style={{ marginBottom: 12, padding: 12, border: '1px solid #eee' }}
                   onClick={() => handleMessageClick(msg.user_id, msg.email)}
                 >
                   <div className="message">{msg.message_text}</div>
@@ -283,19 +283,19 @@ function Home() {
                     
                     if (appStatus === "accepted" || appStatus === "selected") {
                       return (
-                        <button className="apply-status apply" disabled onClick={(e) => e.stopPropagation()}>
+                        <button className="apply-status apply" onClick={(e) => e.stopPropagation()}>
                           ✓ SELECTED
                         </button>
                       );
                     } else if (appStatus === "pending") {
                       return (
-                        <button className="btn-applied apply" disabled onClick={(e) => e.stopPropagation()}>
+                        <button className="btn-applied apply" onClick={(e) => e.stopPropagation()}>
                           ⏳ APPLIED
                         </button>
                       );
                     } else if (appStatus === "rejected") {
                       return (
-                        <button className="btn-rejected apply" disabled onClick={(e) => e.stopPropagation()}>
+                        <button className="btn-rejected apply" onClick={(e) => e.stopPropagation()}>
                           ✗ REJECTED
                         </button>
                       );
