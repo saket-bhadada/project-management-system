@@ -16,9 +16,10 @@ function Home() {
   const [applicantsByMessage, setApplicantsByMessage] = useState({});
   const navigate = useNavigate();
 
-  async function loadMessages() {
+  async function loadMessages(searchQuery = "") {
     try {
-      const response = await fetch(`/api/home`, {
+      const url = searchQuery ? `/api/home?q=${encodeURIComponent(searchQuery)}` : `/api/home`;
+      const response = await fetch(url, {
         credentials: "include",
       });
       
@@ -220,7 +221,7 @@ function Home() {
 
   return (
     <>
-      <NavScrollExample />
+      <NavScrollExample onSearch={(query) => loadMessages(query)} />
       <div className="container">
         {user?.typeofuser === "staff" ? (
           // STAFF VIEW: Applications Received
