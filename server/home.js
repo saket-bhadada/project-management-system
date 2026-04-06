@@ -27,7 +27,7 @@ homeRouter.get("/home",async(req,res)=>{
             JOIN users u ON m.user_id = u.id
             ORDER BY m.created_at DESC
         `);
-        const searchQuery = req.query.search;
+        const searchQuery = req.query.q || req.query.search;
         if(searchQuery){
             const response = await db.query(
                 `SELECT 
@@ -39,16 +39,16 @@ homeRouter.get("/home",async(req,res)=>{
                 u.typeofuser
             FROM message m
             JOIN users u ON m.user_id = u.id
-            WHERE m.message_text LIKE $1
+            WHERE m.message_text ILIKE $1
             ORDER BY m.created_at DESC`,
             [`%${searchQuery}%`]
             );
-            res.json({
+            return res.json({
                 user: req.user,
                 messages: response.rows
             });
         }
-            res.json({
+            return res.json({
                 user: req.user,
                 messages: data.rows
             });
