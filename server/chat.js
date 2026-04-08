@@ -27,5 +27,6 @@ import express from "express";
 const chatRouter = express.Router();
 
 async function assertParticipant(userId,roomId,res) {
-  const {rows} = await db.query();
+  const {rows} = await db.query(`
+    select 1 from chat_participants where room_id = $1 and user_id=$2`,[roomId,userId]);
 }
