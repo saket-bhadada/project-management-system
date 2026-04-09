@@ -29,4 +29,17 @@ const chatRouter = express.Router();
 async function assertParticipant(userId,roomId,res) {
   const {rows} = await db.query(`
     select 1 from chat_participants where room_id = $1 and user_id=$2`,[roomId,userId]);
+  if(rows.length === 0){
+    res.status(403).json({message:"You are not a participant in this chat"});
+    return false;
+  }
+  return true;
+}
+
+async function asserOwner(roomId,userId,res){
+  const {rows} = await db.query(`
+    select 1
+    from chat_rooms r
+    join message m on m.id = r.message_id
+    where r.id = $1 and m.user_id`);
 }
