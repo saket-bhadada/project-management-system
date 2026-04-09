@@ -50,4 +50,32 @@ async function asserOwner(roomId,userId,res){
   return true;
 }
 
-chatRouter.get("")
+chatRouter.get('/api/room/:messageId',async(req,res)=>{
+  const userId = req.user.id;
+  const messageId = req.params;
+  const existing = await db.query(`
+    select r.id
+    from chat_rooms r
+    join message m on m.id = r.message_id
+    where r.message_id = $1 and m.user_id = $2`,
+    [messageId,userId]);
+    if(existing.rows.length){
+      return res.json({roomId:existing.rows[0].id});
+    }
+    const msg = await db.query(`
+      select id, user_id from message where id = $1`,[messageId]
+    );
+    if(!msg.rows.length){
+      return res.status(404).json({message:"message not found"});
+    }
+    if(msg.rows[0].user_id != userId){
+      return res.status(404).json({error:"not a participant"});
+    }
+    const room = await db.query(`
+      insert into chat_rooms(message_id) values ($1)
+      on conflict (message_id) do update set message_id = excluded.message_id
+      returning id`,
+      [messageId]
+    );
+    const roomId = room.rows[0].id;
+});
