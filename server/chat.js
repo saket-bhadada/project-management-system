@@ -78,4 +78,8 @@ chatRouter.get('/api/room/:messageId',async(req,res)=>{
       [messageId]
     );
     const roomId = room.rows[0].id;
+    await db.query(`
+      insert into chat_participants(room_id,user_id) values ($1,$2),`[roomId,userId]);
+
+    res.json({roomId});
 });
