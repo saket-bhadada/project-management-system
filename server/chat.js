@@ -50,6 +50,21 @@ async function asserOwner(roomId,userId,res){
   return true;
 }
 
+async function addparticipantonAcceptance(roomId,userId){
+  //make a chat room if not already exists
+  const room = await db.query(`
+    insert into chat_participants(room_id,user_id) values($1)
+    on conflict (message_id) do update set room_id = excluded.room_id, user_id = excluded.message_id
+    returning id`,
+    [roomId,userId]
+  );
+  const roomId = room.rows[0].id;
+  
+  //add owner to the chat room
+  await db.query();
+
+}
+//creating a chat room
 chatRouter.get('/api/room/:messageId',async(req,res)=>{
   const userId = req.user.id;
   const messageId = req.params;
@@ -82,4 +97,49 @@ chatRouter.get('/api/room/:messageId',async(req,res)=>{
       insert into chat_participants(room_id,user_id) values ($1,$2),`[roomId,userId]);
 
     res.json({roomId});
+});
+// getting all the info from the database
+
+chatRouter.get('/api/room/:roomId/messages',async(req,res)=>{
+  if(!await assertParticipant(req.user.id,req.params.roomId,res)) {
+    return;
+  }
+  const limit = min(parseInt(req.query.limit)||50,100);
+  const before = req.query.before;
+
+  const {rows} = await db.query(`
+    select cm.id,cm.content,cm.created_at,
+    u.id as sender_id,
+    u.email as sender_name
+    from chat_messages cm
+    join users u on u.id = cm.sender_id
+    where cm.room_id = $1
+    ${before ? 'and cm.created_at < (select created_at from chat_messages where id = $3)':''}
+    order by cm.created_at desc
+    limit $2`,
+  before ? [req.params.roomId,limit,before]:[req.params.roomId,limit]);
+
+  res.json({messages:rows});
+});
+
+chatRouter.get('api/room/:roomId/participants',async(req,res)=>{
+  if(!await assertParticipant(req.user.id,req.params.roomId,res)){
+    return;
+  }
+  const {rows} = await db.query(`
+    select u.id,u.email
+    from chat_participants cp
+    join users u on u.id = cp.user_id
+    where cp.room_id = $1`,[req.params.roomId]
+  );
+  res.json({participants:rows});
+});
+
+// adding people to chat start from here
+
+chatRouter.post('/api/:roomId/participants',async(req,res)=>{
+  const userId = req.user.id;
+  const roomId = req.params.roomId;
+  if(!userId) return res.status(401).json({message:"Unauthorized"});
+  const {rowCount} = await db.query();
 });

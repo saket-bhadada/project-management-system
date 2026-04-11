@@ -8,7 +8,7 @@ import passport from "passport";
 import passportRouter from "./passport.js";
 import homeRouter from "./home.js";
 import profileRouter from "./profile.js";
-import setupChat from "./chat.js";
+// import setupChat from "./chat.js";
 // import pg from "pg";
 import session from "express-session";
 // import db from "./db.js";
@@ -60,7 +60,7 @@ app.use("/api", homeRouter);
 app.use("/api",profileRouter);
 // app.use("/api", chatRouter);
 
-setupChat(server);
+// setupChat(server);
 
 // the HTTP server is started elsewhere (see server.js); this module only
 // configures and exports `app` and `server` for reuse.
