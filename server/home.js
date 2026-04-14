@@ -1,6 +1,7 @@
 import express, { application } from "express";
 import { Router } from "express";
 import db from "./db.js";
+import {addparticipantonAcceptance} from "./chat.js";
 
 const homeRouter = express.Router();
 
@@ -186,5 +187,15 @@ homeRouter.put("/applications/:applicationId/status",async(req,res)=>{
         console.log(err);
         res.status(500).json({message:"Internal server error"});
     }
+});
+homeRouter.post("/messages/:messageId/accept/:applicantId",async(req,res)=>{
+    const {messageId,userId} = req.params;
+    await db.query(`
+        update application set status = 'accepted', updated_at = now()
+        where message_id = $1 and applicant_id = $2`,
+        [messageId,userId]
+    );
+    await addparticipantonAcceptance(messageId,userId);
+    res.json({ok:true});
 });
 export default homeRouter;

@@ -23,6 +23,7 @@
 // }
 
 import express from "express";
+import db from "./db.js";
 
 const chatRouter = express.Router();
 
@@ -50,7 +51,7 @@ async function asserOwner(roomId,userId,res){
   return true;
 }
 
-async function addparticipantonAcceptance(roomId,userId){
+async function addparticipantonAcceptance(messageId,userId){
   //make a chat room if not already exists
   const room = await db.query(`
     insert into chat_participants(room_id,user_id) values($1)
@@ -61,7 +62,19 @@ async function addparticipantonAcceptance(roomId,userId){
   const roomId = room.rows[0].id;
   
   //add owner to the chat room
-  await db.query();
+  await db.query(`
+    insert into chat_participants(room_id,user_id)
+    select $1,m.user_id from message m where m.id = $2
+    on conflict do nothing`,
+    [roomId,messageId]
+  );
+
+  await db.query(`
+    insert into chat_messages(room_id,sender_id)
+    values($1,$2)
+    on conflict do nothing`,
+    [roomId,userId]
+  );
 
 }
 //creating a chat room
@@ -141,5 +154,35 @@ chatRouter.post('/api/:roomId/participants',async(req,res)=>{
   const userId = req.user.id;
   const roomId = req.params.roomId;
   if(!userId) return res.status(401).json({message:"Unauthorized"});
-  const {rowCount} = await db.query();
+  const {rowCount} = await db.query(
+    `select u.id,u.email
+    from chat_participants
+    join users uon u.id = package.user_id
+    where p.room_id = $1`,
+    [req.params.roomId]
+  );
+  res.json({rows});
 });
+
+chatRouter.delete('/api/:roomId/participants/:userId',async(req,res)=>{
+  const userId = parseInt(req.params.userId);
+  if(userId === req.user.id){
+    res.status(400).json({message:"You cannot remove yourself from the chat"});
+    return;
+  }
+  const {rowCount} = await db.query(`
+    delete from chat_participants
+    where room_id = $1 and user_id = $2
+    and exists (
+    select 1 from chat_rooms r
+    join message m on m.id = r.message_id
+    where r.id = $1 and m.user_id = $3)`,
+    [req.params.roomId,userId,req.user.id]
+  );
+
+  if(rowCount === 0){
+    res.status(403).json({message:"You are not authorized to remove this participant"});
+    return;
+  }
+});
+export {chatRouter,addparticipantonAcceptance};
