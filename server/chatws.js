@@ -1,6 +1,8 @@
 import express from "express";
 import http from "http";
-
+import WebSocket from "ws";
+import db from "./db.js";
+import { chatRouter } from "./chat";
 const chatwsRoute = express.Router();
 
 const server = http.createServer(chatwsRoute);
