@@ -1,52 +1,206 @@
-# Project Management System
+# 📊 Project Management System
 
-This repository contains a simple Project Management System with a React frontend (`client`) and an Express backend (`server`).
+A comprehensive project management platform with real-time collaboration features, user authentication, and project tracking capabilities.
 
-## Prerequisites
+## 🌟 Features
 
-- Node.js (v16+ recommended)
-- npm (or yarn)
-- PostgreSQL (if you use the server's `pg` dependency)
+| Feature                     | Description                                                                   |
+| --------------------------- | ----------------------------------------------------------------------------- |
+| **👥 User Authentication**  | Secure login/registration with local credentials and Google OAuth integration |
+| **📝 Profile Management**   | Create and manage user profiles with personalized information                 |
+| **✅ Project Applications** | Track and manage project applications with status monitoring                  |
+| **💬 Real-Time Chat**       | Instant messaging with WebSocket support for live communication               |
+| **📊 Status Dashboard**     | Monitor project status and track application progress                         |
+| **🎨 Responsive UI**        | Modern, responsive interface built with React and Bootstrap                   |
 
-## Setup
+## 🏗️ Architecture
 
-1. Open a terminal in the project root.
+```
+Project Management System
+├── client/          (React + Vite Frontend)
+│   └── Features: Login, Profile, Applications, Chat, Status Dashboard
+└── server/          (Express Backend)
+    └── Features: Auth, WebSocket, Database, REST API
+```
 
-2. Install server dependencies:
+### Tech Stack
+
+**Frontend:**
+
+- React 19
+- Vite (fast build tool)
+- React Router (navigation)
+- Bootstrap 5 (styling)
+- Socket.io Client (real-time communication)
+
+**Backend:**
+
+- Express.js
+- PostgreSQL (database)
+- Passport.js (authentication)
+- Socket.io (WebSocket support)
+- bcrypt (password encryption)
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- **Node.js** v16+ ([Download](https://nodejs.org))
+- **npm** or yarn
+- **PostgreSQL** database
+
+### Installation
+
+1. **Clone and navigate to project root:**
 
 ```powershell
+cd project-management-system
+```
+
+2. **Install dependencies:**
+
+```powershell
+# Install server dependencies
 cd server
+npm install
+
+# Install client dependencies (in new terminal)
+cd client
 npm install
 ```
 
-3. Install client dependencies:
+### Running the Application
 
-Split terminal
+**Option 1: Using Split Terminal (Recommended)**
 
-- Open the integrated terminal in VS Code: press Ctrl+`.
-- Split the terminal: click the split icon in the terminal pane or run `Terminal: Split Terminal` from the Command Palette.
+- Press `Ctrl+`` to open terminal in VS Code
+- Click the split icon to create a second terminal
 
-In one terminal (React):
-
-```powershell
-cd client
-# you can override the dev port, backend proxy, etc. by setting env vars
-# e.g. $env:PORT=5174; $env:BACKEND_URL=http://localhost:4000; npm run dev
-npm run dev
-```
-
-In the other terminal (nodemon):
+**Terminal 1 - Backend (Node/Express):**
 
 ```powershell
 cd server
-# create a `.env` (see `.env.example`) to supply your database credentials,
-# server port, and other settings.  **Do not set `PORT` to 5432** – use
-# `DB_PORT` for the database and `SERVER_PORT` for the web server.
-#
-# the HTTP/WebSocket server will use SERVER_PORT (default 3000);
-# the database client uses DB_PORT (default 5432).
+# Create .env file with database credentials (see .env.example)
+# DB_PORT=5432, SERVER_PORT=3000
 npx nodemon server.js
 ```
+
+**Terminal 2 - Frontend (React/Vite):**
+
+```powershell
+cd client
+npm run dev
+# Visit http://localhost:5173
+```
+
+### Environment Configuration
+
+**Server (.env file in `/server` directory):**
+
+```
+SERVER_PORT=3000
+DB_PORT=5432
+DATABASE_URL=your_postgresql_url
+SESSION_SECRET=your_secret_key
+GOOGLE_CLIENT_ID=your_google_oauth_id
+GOOGLE_CLIENT_SECRET=your_google_oauth_secret
+```
+
+## 📱 Usage
+
+1. **Register/Login**: Create an account or sign in with Google
+2. **View Dashboard**: Access the home page to see projects and applications
+3. **Manage Profile**: Update your profile information
+4. **Track Applications**: Monitor project application statuses
+5. **Real-Time Chat**: Communicate with team members instantly
+6. **Check Status**: View current project and application status
+
+## 🛠️ Available Commands
+
+**Client:**
+
+```powershell
+npm run dev      # Start development server
+npm run build    # Build for production
+npm run preview  # Preview production build
+npm run lint     # Run ESLint
+```
+
+**Server:**
+
+```powershell
+npm run dev      # Start with nodemon (auto-reload)
+npm start        # Start production server
+npm test         # Run tests
+```
+
+## 📂 Project Structure
+
+```
+.
+├── client/                  # React frontend
+│   ├── src/
+│   │   ├── main.jsx        # App entry point & routing
+│   │   ├── login.jsx       # Login page
+│   │   ├── registration.jsx # Registration page
+│   │   ├── home.jsx        # Dashboard
+│   │   ├── profile.jsx     # User profile
+│   │   ├── applications.jsx # Project applications
+│   │   ├── chat.jsx        # Chat interface
+│   │   ├── status.jsx      # Status page
+│   │   └── navbar.jsx      # Navigation
+│   └── package.json
+│
+└── server/                 # Express backend
+    ├── server.js           # Main server entry
+    ├── index.js            # Express app setup
+    ├── db.js               # Database connection
+    ├── passport.js         # Authentication config
+    ├── home.js             # Home routes
+    ├── profile.js          # Profile routes
+    ├── chat.js             # Chat routes
+    ├── chatws.js           # WebSocket chat
+    └── package.json
+```
+
+## 🔐 Security
+
+- Passwords encrypted with bcrypt
+- Session management with express-session
+- CORS enabled for frontend-backend communication
+- OAuth 2.0 integration for Google authentication
+- HTTP-only cookies for session protection
+
+## 🤝 Contributing
+
+1. Create a feature branch: `git checkout -b feature/your-feature`
+2. Commit changes: `git commit -m "Add your feature"`
+3. Push to branch: `git push origin feature/your-feature`
+4. Open a Pull Request
+
+## 📝 Notes
+
+- **Development Only**: MemoryStore is used for sessions; use Redis/PostgreSQL in production
+- **HTTPS**: Set `secure: true` in cookie settings when deploying with HTTPS
+- **Database**: Ensure PostgreSQL is running before starting the server
+- **Port Conflict**: Don't set `PORT` to 5432 (reserved for DB); use `SERVER_PORT` for web server
+
+## 🆘 Troubleshooting
+
+| Issue                      | Solution                                                       |
+| -------------------------- | -------------------------------------------------------------- |
+| Cannot connect to database | Check PostgreSQL is running and `.env` credentials are correct |
+| CORS errors                | Verify `CLIENT_URL` in server matches your frontend URL        |
+| WebSocket connection fails | Ensure Server_PORT is open and Socket.io client is configured  |
+| Port already in use        | Change `SERVER_PORT` or `PORT` in `.env`                       |
+
+## 📄 License
+
+ISC
+
+---
+
+**Made with ❤️ for project management**
 
 > ⚠️ **Environment variable cheatsheet**
 >
