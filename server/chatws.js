@@ -32,7 +32,14 @@ export function setupChat(server,sessionParser) {
               ws.send(JSON.stringify({type:"error",message:"Invalid message format"}));
             }
             if(msg.type === "join"){
-              
+              const {rows} = await db.query(`
+                select 1 from chat_participants
+                where chat_id = $1 and user_id = $2`,
+              [msg.roomId,userId]);
+              if(rows.length === 0){
+                return ws.send(JSON.stringify({type:"error",message:"Not a participant of this chat"}));
+              }
+              currentRoom = msg.roomId;
             }
           })
         });
