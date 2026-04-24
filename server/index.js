@@ -8,7 +8,8 @@ import passport from "passport";
 import passportRouter from "./passport.js";
 import homeRouter from "./home.js";
 import profileRouter from "./profile.js";
-// import setupChat from "./chat.js";
+import { setupChat } from "./chatws.js";
+import { chatRouter } from "./chat.js";
 // import pg from "pg";
 import session from "express-session";
 // import db from "./db.js";
@@ -36,7 +37,7 @@ app.use(express.json());
 // use a persistent session store (Redis, PG store, etc.). This MemoryStore
 // is fine for local development only.
 const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-session-secret';
-app.use(session({
+const sessionMiddleware = session({
     secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
@@ -45,8 +46,9 @@ app.use(session({
         secure: false, // set to true when serving over HTTPS
         sameSite: 'lax',
     },
-}));
+});
 
+app.use(sessionMiddleware);
 
 // Initialize passport middleware and enable persistent login sessions
 app.use(passport.initialize());
@@ -59,8 +61,10 @@ app.use("/api", passportRouter);
 app.use("/api", homeRouter);
 app.use("/api",profileRouter);
 // app.use("/api", chatRouter);
+app.use("/api/chat", chatRouter);
 
-// setupChat(server);
+// Initialize WebSocket for chat
+setupChat(server, sessionMiddleware);
 
 // the HTTP server is started elsewhere (see server.js); this module only
 // configures and exports `app` and `server` for reuse.

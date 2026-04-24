@@ -11,6 +11,10 @@ export default defineConfig({
       // you can set BACKEND_URL in an `.env` file or export it before
       // running `npm run dev`.
       '/api': process.env.BACKEND_URL || 'http://localhost:3000',
+      '/ws': {
+        target: process.env.BACKEND_URL || 'ws://localhost:3000',
+        ws: true,
+      },
     },
   },
 });
