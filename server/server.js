@@ -22,13 +22,17 @@ server.listen(PORT, () => {
 });
 
 // connect to database (best effort)
+console.log('Connecting to database...');
 db.connect()
   .then(async () => {
+    console.log('Database connected successfully.');
     try {
       await initSchema();
-      console.log('Database schema initialized.');
     } catch (err) {
-      console.warn('DB schema init warning:', err.message || err);
+      console.error('DB schema init error:', err.message || err);
     }
   })
-  .catch(err => console.warn('DB connect warning:', err.message || err));
+  .catch(err => {
+    console.error('CRITICAL: DB connect failed!', err.message || err);
+    console.error('Check your .env variables (DB_USER, DB_HOST, DB_PASSWORD, etc.)');
+  });

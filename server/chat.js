@@ -2,6 +2,12 @@ import express from "express";
 import db from "./db.js";
 
 const chatRouter = express.Router();
+chatRouter.use((req, res, next) => {
+  if (req.isAuthenticated && req.isAuthenticated()) {
+    return next();
+  }
+  res.status(401).json({ error: "Not authenticated" });
+});
 
 // ─────────────────────────────────────────────
 // HELPERS
@@ -129,11 +135,11 @@ chatRouter.get('/:roomId/messages', async (req, res) => {
     `SELECT cm.id, cm.content, cm.created_at,
             u.id    AS sender_id,
             u.email AS sender_email
-     FROM chat_messages cm
+     FROM chat_message cm
      JOIN users u ON u.id = cm.sender_id
      WHERE cm.room_id = $1
        ${before ? `AND cm.created_at < (
-           SELECT created_at FROM chat_messages WHERE id = $3
+           SELECT created_at FROM chat_message WHERE id = $3
          )` : ''}
      ORDER BY cm.created_at DESC
      LIMIT $2`,
