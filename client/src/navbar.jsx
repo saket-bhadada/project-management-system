@@ -59,7 +59,7 @@ function NavScrollExample({ onSearch }) {
             {!loading && user?.typeofuser === "staff" && (
               <Nav.Link as={Link} to="/applications">Applications</Nav.Link>
             )}
-            <Nav.Link as={Link} to="/chats">Chats</Nav.Link>
+            {/* <Nav.Link as={Link} to="/chats">Chats</Nav.Link> */}
           </Nav>
           <Form className="d-flex search-form-custom" onSubmit={handleSearch}>
             <div className="search-input-wrapper">
