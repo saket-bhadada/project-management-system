@@ -44,6 +44,7 @@ homeRouter.post("/messages/:messageId/apply", async (req, res) => {
 
     const messageId = req.params.messageId;
     const userId    = req.user?.id;
+    const { application_message } = req.body || {};
 
     const messageResult = await db.query(
       `SELECT m.user_id, u.typeofuser AS owner_type
@@ -64,12 +65,12 @@ homeRouter.post("/messages/:messageId/apply", async (req, res) => {
       return res.status(403).json({ message: "Staff cannot apply to messages" });
 
     const applicationResult = await db.query(
-      `INSERT INTO application (message_id, applicant_id)
-       VALUES ($1, $2)
+      `INSERT INTO application (message_id, applicant_id, application_message)
+       VALUES ($1, $2, $3)
        ON CONFLICT (message_id, applicant_id)
-       DO UPDATE SET updated_at = now()
+       DO UPDATE SET updated_at = now(), application_message = EXCLUDED.application_message
        RETURNING *`,
-      [messageId, userId]
+      [messageId, userId, application_message || null]
     );
     res.json({ success: true, application: applicationResult.rows[0] });
   } catch (err) {
@@ -96,9 +97,10 @@ homeRouter.get("/messages/:messageId/applications", async (req, res) => {
       return res.status(403).json({ message: "You are not the owner of this message" });
 
     const applicants = await db.query(
-      `SELECT a.id, a.status, a.created_at,
+      `SELECT a.id, a.status, a.created_at, a.application_message,
               u.id    AS applicant_id,
-              u.email AS applicant_email
+              u.email AS applicant_email,
+              u.resume_url AS applicant_resume_url
        FROM application a
        JOIN users u ON a.applicant_id = u.id
        WHERE a.message_id = $1`,

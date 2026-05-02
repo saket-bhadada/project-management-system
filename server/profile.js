@@ -14,16 +14,35 @@ profileRouter.get("/profile", async (req, res) => {
 
     try {
         const user = req.user;
+        // Fetch users details to get resume_url
+        const userResult = await db.query('SELECT * FROM users WHERE id = $1', [user.id]);
+        const fullUser = userResult.rows[0];
+
         // Fetch messages for this user
         const messagesResult = await db.query('SELECT * FROM message WHERE user_id = $1 ORDER BY created_at DESC', [user.id]);
         
         res.json({
             success: true,
-            user: user,
+            user: fullUser,
             messages: messagesResult.rows
         });
     } catch (err) {
         console.error("Error fetching profile data:", err);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
+profileRouter.put("/profile/resume", async (req, res) => {
+    if (!req.isAuthenticated || !req.isAuthenticated()) {
+        return res.status(401).json({ success: false, message: "Not authenticated" });
+    }
+
+    try {
+        const { resume_url } = req.body;
+        await db.query('UPDATE users SET resume_url = $1 WHERE id = $2', [resume_url, req.user.id]);
+        res.json({ success: true, message: "Resume updated successfully" });
+    } catch (err) {
+        console.error("Error updating resume:", err);
         res.status(500).json({ success: false, message: "Server error" });
     }
 });

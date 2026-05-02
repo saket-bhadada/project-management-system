@@ -59,10 +59,21 @@ export async function initSchema() {
                 message_id INTEGER NOT NULL REFERENCES message(id) ON DELETE CASCADE,
                 applicant_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                 status TEXT NOT NULL DEFAULT 'pending',
+                application_message TEXT,
                 created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 UNIQUE (message_id, applicant_id)
             );
+        `);
+
+        // Add application_message if it doesn't exist (for existing DBs)
+        await db.query(`
+            ALTER TABLE application ADD COLUMN IF NOT EXISTS application_message TEXT;
+        `);
+
+        // Add resume_url to users
+        await db.query(`
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS resume_url TEXT;
         `);
 
         // 4. Chat Rooms

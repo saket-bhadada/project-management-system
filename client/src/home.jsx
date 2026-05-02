@@ -129,6 +129,10 @@ function Home() {
   async function handleApply(e, messageId, ownerId) {
     e.preventDefault();
     e.stopPropagation();
+    
+    const applicationMessage = window.prompt("Would you like to add a message to your application? (Optional)");
+    if (applicationMessage === null) return; // Cancelled
+    
     try {
       const response = await fetch(`/api/messages/${messageId}/apply`, {
         method: "POST",
@@ -136,7 +140,7 @@ function Home() {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ user_id: ownerId })
+        body: JSON.stringify({ user_id: ownerId, application_message: applicationMessage })
       });
       if (!response.ok) {
         throw new Error(`Failed to apply: ${response.status}`);
@@ -247,6 +251,12 @@ function Home() {
                         {applicantsByMessage[msg.id].map((app) => (
                           <div key={app.id} style={{ padding: 8, backgroundColor: '#f5f5f5', marginBottom: 8, borderRadius: 4 }}>
                             <div><strong>Email:</strong> {app.applicant_email}</div>
+                            {app.applicant_resume_url && (
+                                <div><strong>Resume:</strong> <a href={app.applicant_resume_url} target="_blank" rel="noreferrer">View Resume</a></div>
+                            )}
+                            {app.application_message && (
+                                <div><strong>Message:</strong> {app.application_message}</div>
+                            )}
                             <div><strong>Status:</strong> <span 
                             style={{ color: app.status === "pending" ? "orange" : app.status === "accepted" ? "green" : "red" }}
                             >{app.status}</span></div>

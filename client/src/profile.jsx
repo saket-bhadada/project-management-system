@@ -7,7 +7,8 @@ export default function Profile() {
     const [user, setUser] = useState();
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
-
+    const [resumeUrl, setResumeUrl] = useState("");
+    const [isUpdatingResume, setIsUpdatingResume] = useState(false);
 
     async function loadProfile() {
         try {
@@ -22,6 +23,9 @@ export default function Profile() {
             if (data.success) {
                 setUser(data.user);
                 setMessages(data.messages);
+                if (data.user?.resume_url) {
+                    setResumeUrl(data.user.resume_url);
+                }
             } else {
                 console.error("Profile load failed:", data.message);
                 // If not authenticated, maybe redirect?
@@ -58,6 +62,33 @@ export default function Profile() {
             }
         }catch(err){
             console.error("Error adding message", err);
+        }
+    }
+
+    async function updateResume() {
+        if (!resumeUrl.trim()) return;
+        setIsUpdatingResume(true);
+        try {
+            const response = await fetch("/api/profile/resume", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({ resume_url: resumeUrl })
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert("Resume updated successfully!");
+                setUser({ ...user, resume_url: resumeUrl });
+            } else {
+                alert("Failed to update resume: " + data.message);
+            }
+        } catch (err) {
+            console.error("Error updating resume", err);
+            alert("Error updating resume.");
+        } finally {
+            setIsUpdatingResume(false);
         }
     }
 
@@ -103,9 +134,39 @@ export default function Profile() {
             {/* ===========================
                 STUDENT VIEW
             ============================ */}
-            {user?.typeuser === "student" && (
-                <div>
-                    <h3>Students cannot view messages.</h3>
+            {user?.typeofuser === "student" && (
+                <div className="student-section">
+                    <h3>Student Profile</h3>
+                    
+                    <div className="resume-section" style={{ marginTop: '20px', padding: '15px', border: '1px solid #ddd', borderRadius: '8px' }}>
+                        <h4>My Resume</h4>
+                        <div style={{ marginBottom: '15px' }}>
+                            {user.resume_url ? (
+                                <div>
+                                    <p>Current Resume: <a href={user.resume_url} target="_blank" rel="noreferrer">View Resume</a></p>
+                                </div>
+                            ) : (
+                                <p style={{ color: '#888' }}>No resume uploaded yet.</p>
+                            )}
+                        </div>
+                        
+                        <div className="update-resume" style={{ display: 'flex', gap: '10px' }}>
+                            <input 
+                                type="url" 
+                                placeholder="Paste your resume URL (e.g. Google Drive link)" 
+                                value={resumeUrl}
+                                onChange={(e) => setResumeUrl(e.target.value)}
+                                style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                            />
+                            <button 
+                                onClick={updateResume} 
+                                disabled={isUpdatingResume}
+                                style={{ padding: '8px 16px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                            >
+                                {isUpdatingResume ? "Updating..." : "Update Resume"}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 
