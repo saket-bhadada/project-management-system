@@ -178,6 +178,16 @@ function Applications() {
                               <p>
                                 <strong>Email:</strong> {applicant.applicant_email}
                               </p>
+                              {applicant.applicant_resume_url && (
+                                <p>
+                                  <strong>Resume:</strong> <a href={applicant.applicant_resume_url} target="_blank" rel="noreferrer">View Resume</a>
+                                </p>
+                              )}
+                              {applicant.application_message && (
+                                <p>
+                                  <strong>Message:</strong> {applicant.application_message}
+                                </p>
+                              )}
                               <p style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <strong>Status:</strong>
                                 <span className={`status-badge status-${applicant.status}`}>
