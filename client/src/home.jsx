@@ -284,7 +284,6 @@ function Home() {
                   key={msg.id} 
                   className="project" 
                   style={{ marginBottom: 12, padding: 12, border: '1px solid #eee' }}
-                  onClick={() => handleMessageClick(msg.user_id, msg.email)}
                 >
                   <div className="message">{msg.message_text}</div>
                   <div className="email">{msg.email}</div>
