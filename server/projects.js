@@ -76,5 +76,75 @@ ProjectRouter.post("/:messageId/files",async(req,res)=>{
   } = req.body;
 
   if(!name) return res.status(400).json({message:"file name is required"});
-  try{}catch(error){}
+  try{
+     const access = await db.query(
+      `SELECT 1 FROM chat_participants cp
+       JOIN chat_rooms cr ON cr.id = cp.room_id
+       WHERE cr.message_id = $1 AND cp.user_id = $2
+       UNION
+       SELECT 1 FROM message WHERE id = $1 AND user_id = $2`,
+      [messageId, req.user.id]
+    );
+    if (!access.rows.length)
+      return res.status(403).json({ error: "Not a project participant" });
+
+    const {rows} = await db.query(
+      `insert into project_files (message_id,name,path,language,content,created_by)
+      values ($1,$2,$3,$4,$5,$6)
+      return *`,
+      [messageId,name,path,language,content,req.user.id]
+    );
+
+    await db.query(
+      `insert into project_files_version (file_id,content,changed_by,change_summery)
+      values ($1,$2,$3,'file created')`,
+      [rows[0].id,content,req.user.id]
+    );
+
+    res.status(404).json(rows[0]);
+  }catch(error){
+    if(error.code === '23505')
+      return res.status(409).json({error:"file already exists at that path"});
+    console.error(error);
+    res.status(500).json({error:"server error"});
+  }
+});
+
+ProjectRouter.put("/:messageId/files/:fileId",async(req,res)=>{
+  const {messageId,fileId} = req.params;
+  const {content,change_summery = "update"} = req.body;
+
+  try{
+    const access = await db.query(
+      `SELECT 1 FROM chat_participants cp
+       JOIN chat_rooms cr ON cr.id = cp.room_id
+       WHERE cr.message_id = $1 AND cp.user_id = $2
+       UNION
+       SELECT 1 FROM message WHERE id = $1 AND user_id = $2`,
+      [messageId, req.user.id]
+    );
+    if (!access.rows.length)
+      return res.status(403).json({ error: "Not a project participant" });
+    
+
+    const {rows} = await db.query(
+      `update project_files
+      set content = $1, updated_at = now()
+      where id = $2 and message_id = $3
+      return *`,
+      [content,fileId,messageId]
+    );
+    if(!rows.length) return res.status(404).json({message:"file not found"});
+
+    await db.query(
+      `insert into project_files_version (file_id,content,changed_by,change_summery)
+      values ($1,$2,$3,$4)`,
+      [fileId,content,req.user.id,change_summery]
+    );
+
+    res.json(rows[0]);
+  }catch(err){
+    console.error(err);
+    res.status(500).json({error:"server error"});
+  }
 });
