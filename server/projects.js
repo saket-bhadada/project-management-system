@@ -148,3 +148,22 @@ ProjectRouter.put("/:messageId/files/:fileId",async(req,res)=>{
     res.status(500).json({error:"server error"});
   }
 });
+
+ProjectRouter.delete("/:messageId/files/:fileId",async(req,res)=>{
+  const {messageId,fileId} = req.params;
+  try{
+    const {rows} = await db.query(
+      `delete from project_files
+      where id = $1 and message_id = $2
+      and (created_by = $3 or exists(
+      select 1 from message where id = $2 and user_id = $3))
+      return id`,
+      [fileId,messageId,req.user.id]
+    );
+    if(!rows.length) return res.status(404).json({message:"file not found or you do not have permission to delete this file"});
+    res.json({ok:true});
+  }catch(err){
+    console.error(err);
+    res.status(500).json({error:"server error"});
+  }
+});
