@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 
 // ─────────────────────────────────────────────
 // HOOKS
@@ -223,8 +223,35 @@ export default function Chat({ messageId: propMessageId }) {
       <div style={styles.chatPanel}>
 
         {/* Header */}
-        <div style={styles.chatHeader}>
-          Chat
+        <div style={{ ...styles.chatHeader, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>Chat Room</span>
+          <Link
+            to={`/chats/${messageId}/workspace`}
+            style={{
+              padding: '6px 14px',
+              background: '#14b8a6',
+              color: '#fff',
+              borderRadius: '8px',
+              textDecoration: 'none',
+              fontSize: '12px',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 6px rgba(20, 184, 166, 0.2)',
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = '#0d9488';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = '#14b8a6';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+          >
+            📁 Code Workspace
+          </Link>
         </div>
 
         {/* Load more */}

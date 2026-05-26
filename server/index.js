@@ -10,6 +10,7 @@ import homeRouter from "./home.js";
 import profileRouter from "./profile.js";
 import { setupChat } from "./chatws.js";
 import { chatRouter } from "./chat.js";
+import ProjectRouter from "./projects.js";
 // import pg from "pg";
 import session from "express-session";
 // import db from "./db.js";
@@ -62,6 +63,7 @@ app.use("/api", homeRouter);
 app.use("/api",profileRouter);
 // app.use("/api", chatRouter);
 app.use("/api/chat", chatRouter);
+app.use("/api/projects", ProjectRouter);
 
 // Initialize WebSocket for chat
 setupChat(server, sessionMiddleware);

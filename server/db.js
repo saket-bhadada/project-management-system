@@ -107,6 +107,34 @@ export async function initSchema() {
             );
         `);
 
+        // 7. Project Files table
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS project_files (
+                id SERIAL PRIMARY KEY,
+                message_id INTEGER NOT NULL REFERENCES message(id) ON DELETE CASCADE,
+                name TEXT NOT NULL,
+                path TEXT NOT NULL DEFAULT '/',
+                language TEXT NOT NULL DEFAULT 'plaintext',
+                content TEXT NOT NULL DEFAULT '',
+                created_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                create_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                UNIQUE (message_id, path, name)
+            );
+        `);
+
+        // 8. Project Files Version table
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS project_files_version (
+                id SERIAL PRIMARY KEY,
+                file_id INTEGER NOT NULL REFERENCES project_files(id) ON DELETE CASCADE,
+                content TEXT NOT NULL DEFAULT '',
+                changed_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                change_summery TEXT NOT NULL DEFAULT 'update',
+                create_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+        `);
+
         console.log("Database schema verified.");
     } catch (err) {
         console.error("Schema init failed:", err.message);
