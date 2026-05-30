@@ -14,25 +14,25 @@ dotenv.config();
 // }
 
 const db = new pg.Client({
-    user: process.env.DB_USER || process.env.USER,
-    host: process.env.DB_HOST || process.env.HOST,
-    database: process.env.DB_DATABASE || process.env.DATABASE,
-    password: process.env.DB_PASSWORD || process.env.PASSWORD,
-    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 5432,
+  user: process.env.DB_USER || process.env.USER,
+  host: process.env.DB_HOST || process.env.HOST,
+  database: process.env.DB_DATABASE || process.env.DATABASE,
+  password: process.env.DB_PASSWORD || process.env.PASSWORD,
+  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 5432,
 });
 
 // Handle unexpected errors on the client
-db.on('error', (err) => {
-    console.error('Database client error:', err.message);
+db.on("error", (err) => {
+  console.error("Database client error:", err.message);
 });
 
 export default db;
 
 // Ensures required tables exist in the database.
 export async function initSchema() {
-    try {
-        // 1. Users table
-        await db.query(`
+  try {
+    // 1. Users table
+    await db.query(`
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
                 email TEXT UNIQUE NOT NULL,
@@ -42,8 +42,8 @@ export async function initSchema() {
             );
         `);
 
-        // 2. Message table (original posts)
-        await db.query(`
+    // 2. Message table (original posts)
+    await db.query(`
             CREATE TABLE IF NOT EXISTS message (
                 id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -52,8 +52,8 @@ export async function initSchema() {
             );
         `);
 
-        // 3. Application table
-        await db.query(`
+    // 3. Application table
+    await db.query(`
             CREATE TABLE IF NOT EXISTS application (
                 id SERIAL PRIMARY KEY,
                 message_id INTEGER NOT NULL REFERENCES message(id) ON DELETE CASCADE,
@@ -66,18 +66,18 @@ export async function initSchema() {
             );
         `);
 
-        // Add application_message if it doesn't exist (for existing DBs)
-        await db.query(`
+    // Add application_message if it doesn't exist (for existing DBs)
+    await db.query(`
             ALTER TABLE application ADD COLUMN IF NOT EXISTS application_message TEXT;
         `);
 
-        // Add resume_url to users
-        await db.query(`
+    // Add resume_url to users
+    await db.query(`
             ALTER TABLE users ADD COLUMN IF NOT EXISTS resume_url TEXT;
         `);
 
-        // 4. Chat Rooms
-        await db.query(`
+    // 4. Chat Rooms
+    await db.query(`
             CREATE TABLE IF NOT EXISTS chat_rooms (
                 id SERIAL PRIMARY KEY,
                 message_id INTEGER NOT NULL UNIQUE REFERENCES message(id) ON DELETE CASCADE,
@@ -85,8 +85,8 @@ export async function initSchema() {
             );
         `);
 
-        // 5. Chat Participants
-        await db.query(`
+    // 5. Chat Participants
+    await db.query(`
             CREATE TABLE IF NOT EXISTS chat_participants (
                 id SERIAL PRIMARY KEY,
                 room_id INTEGER NOT NULL REFERENCES chat_rooms(id) ON DELETE CASCADE,
@@ -96,8 +96,8 @@ export async function initSchema() {
             );
         `);
 
-        // 6. Chat Message
-        await db.query(`
+    // 6. Chat Message
+    await db.query(`
             CREATE TABLE IF NOT EXISTS chat_message (
                 id SERIAL PRIMARY KEY,
                 room_id INTEGER NOT NULL REFERENCES chat_rooms(id) ON DELETE CASCADE,
@@ -107,8 +107,8 @@ export async function initSchema() {
             );
         `);
 
-        // 7. Project Files table
-        await db.query(`
+    // 7. Project Files table
+    await db.query(`
             CREATE TABLE IF NOT EXISTS project_files (
                 id SERIAL PRIMARY KEY,
                 message_id INTEGER NOT NULL REFERENCES message(id) ON DELETE CASCADE,
@@ -123,8 +123,8 @@ export async function initSchema() {
             );
         `);
 
-        // 8. Project Files Version table
-        await db.query(`
+    // 8. Project Files Version table
+    await db.query(`
             CREATE TABLE IF NOT EXISTS project_files_version (
                 id SERIAL PRIMARY KEY,
                 file_id INTEGER NOT NULL REFERENCES project_files(id) ON DELETE CASCADE,
@@ -135,9 +135,9 @@ export async function initSchema() {
             );
         `);
 
-        console.log("Database schema verified.");
-    } catch (err) {
-        console.error("Schema init failed:", err.message);
-        throw err;
-    }
+    console.log("Database schema verified.");
+  } catch (err) {
+    console.error("Schema init failed:", err.message);
+    throw err;
+  }
 }
