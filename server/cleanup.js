@@ -22,11 +22,20 @@ export async function runCleanup() {
       join chat_room cr on cr.id = cm.room_id
       where cr.rentention_hours > 0
       and cm.created_at < now() - (cr.retention_hours * interval '1 hour')
-      )`
+      )`,
     );
-    if (result.rowCount > 0)
-    {
-      console.log(`[cleanup] Deleted ${result.rowCount} expired chat message(s).`);
-      }
+    if (result.rowCount > 0) {
+      console.log(
+        `[cleanup] Deleted ${result.rowCount} expired chat message(s).`,
+      );
+    }
+  } catch (error) {
+    console.error(`[cleanup] Error: ${error.message}`);
   }
+}
+
+export async function startCleanupJob() {
+  runCleanup();
+  const timer = setInterval(runCleanup, INTERVAL_MS);
+  return timer;
 }
