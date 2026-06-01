@@ -43,9 +43,31 @@ rententionRouter.get("/chat/:roomId/retention", async (req, res) => {
     const ownerCheck = await db.query(
       `select 1
       from chat_rooms cr
-      join cr.id = $1 and m.user_id = $2`,
+      join message m on m.id=cr.message_id
+      where cr.id = $1 and m.user_id = $2`,
       [roomId, req.user.id],
     );
+    if (!ownerCheck.rows.length) {
+      return res
+        .status(403)
+        .json({ message: "only room owner can change retention hours" });
+    }
+    await db.query("update chat_rooms set retention_hours =$1 where id=$2", [
+      Number(retention_hours),
+      roomId,
+    ]);
+    if (Number(retention_hours) > 0) {
+      const del = await db.query(
+        `delete from chat_messages
+        where room_id=$1
+        and created_at < now() - ($2*Internal'1 hours')`,
+        [roomId, Number(retention_hours)],
+      );
+      console.log(
+        `[retention] Pruned ${del.rowCount} old message(s) from room ${roomId}.`,
+      );
+    }
+    res.json({ ok: true, retention_hours: Number(retention_hours) });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
