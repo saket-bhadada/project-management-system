@@ -11,7 +11,11 @@ export function setupProjectWS(server, sessionParser) {
   ws.on("connection", (ws, req) => {
     sessionParser(req, {}, () => {
       passport.initialize()(req, {}, () => {
-        passport.session()(req, {}, async () => {});
+        passport.session()(req, {}, async () => {
+          if (!req.user) {
+            ws.send(JSON.stringify({ type: "error", message: "Unauthorized" }));
+          }
+        });
       });
     });
   });
