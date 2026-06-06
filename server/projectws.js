@@ -51,6 +51,91 @@ export function setupProjectWS(server, sessionParser) {
                 );
                 return;
               }
+              currentProject = projectId;
+              if (!projectRooms.has(projectId))
+                projectRooms.set(projectId, new set());
+              projectRooms
+                .get(projectId)
+                .add({ ws, userId, email: userEmail, activeFile: null });
+              ws.send(JSON.stringify({ type: "joined_project", projectId }));
+              broadcastPresence(projectId);
+              console.log(`user ${userEmail} joined project ${projectId}`);
+            }
+            if (msg.type === "file_edit" && currentProject) {
+              const { fileId, content, cursorLine, cursorCol } = msg;
+              if (!fileId || content === undefined) return;
+
+              const payload = JSON.stringify({
+                type: "file_edit",
+                fileId,
+                content,
+                cursorLine: cursorLine || 0,
+                cursorCol: cursorCol || 0,
+                editorId: userId,
+                editorEmail: userEmail,
+                timestamp: Date.now(),
+              });
+              projectRooms.get(currentProject)?.forEach((client) => {
+                if (
+                  client.ws !== ws &&
+                  client.ws.readyState === Websocket.OPEN
+                ) {
+                  client.ws.send(payload);
+                }
+              });
+            }
+            if (msg.type === "file_save" && currentProject) {
+              const { fileId, content, changeSummary } = msg;
+              if (!fileId || content === undefined) return;
+              try {
+                await db.query(
+                  `update project_files set content = $1, updated_at = NOW()
+                  where id = $2 and message_id = $3`,
+                  [content, fileId, currentProject],
+                );
+                await db.query(
+                  `insert into project_file_versions (file_id,content,changed_by,change_summary)
+                  values ($1,$2,$3,$4)`,
+                  [fileId, content, userId, changeSummary || "saved"],
+                );
+                const payload = JSON.stringify({
+                  type: "file_saved",
+                  fileId,
+                  content,
+                  savedBy: userEmail,
+                  savedById: userId,
+                  changeSummary: changeSummary || "Saved",
+                  timestamp: Date.now(),
+                });
+                projectRooms.get(currentProject)?.forEach((client) => {
+                  if (client.ws.readyState === WebSocket.OPEN)
+                    client.ws.send(payload);
+                });
+                console.log(
+                  `File ${fileId} saved by ${userEmail} in project ${currentProject}`,
+                );
+              } catch (err) {
+                console.error("Save error:", err.message);
+                ws.send(
+                  JSON.stringify({ type: "error", message: "Save failed" }),
+                );
+              }
+              if (msg.type === "file_deleted" && currentProject) {
+                const payload = JSON.stringify({
+                  type: "file_deleted",
+                  fileId: msg.fileId,
+                  deletedBy: userEmail,
+                  timestamp: Date.now(),
+                });
+                projectRooms.get(currentProject)?.forEach((client) => {
+                  if (
+                    client.ws !== ws &&
+                    client.ws.readyState === WebSocket.OPEN
+                  ) {
+                    client.ws.send(payload);
+                  }
+                });
+              }
             }
           });
         });
