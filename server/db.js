@@ -134,7 +134,12 @@ export async function initSchema() {
                 create_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
             );
         `);
-
+    await db.query(`
+        CREATE INDEX IF NOT EXISTS idx_project_files_message
+          ON project_files(message_id);
+        CREATE INDEX IF NOT EXISTS idx_project_file_versions_file
+          ON project_file_versions(file_id);
+      `);
     console.log("Database schema verified.");
   } catch (err) {
     console.error("Schema init failed:", err.message);

@@ -15,6 +15,7 @@ import CurrentStatus from './status.jsx'
 import Applications from './applications.jsx'
 import Chat from './Chat.jsx'
 import Workspace from './Workspace.jsx'
+import ProjectManager from './project.jsx'
 // Nav bar is only shown on the home page now
 import Home from './home.jsx'
 
@@ -40,6 +41,7 @@ const router = createBrowserRouter([
       { path: 'applications', element: <Applications /> },
       { path: 'chats/:messageId?', element: <Chat /> },
       { path: 'chats/:messageId/workspace', element: <Workspace /> },
+      { path: 'projects/:messageId', element: <ProjectManager /> },
     ],
   },
 ]);
