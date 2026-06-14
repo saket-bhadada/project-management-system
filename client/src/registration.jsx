@@ -12,6 +12,7 @@ function Registration() {
     try {
       const response = await fetch('/api/register', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },

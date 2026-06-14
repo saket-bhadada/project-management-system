@@ -23,16 +23,34 @@ server.listen(PORT, () => {
 
 // connect to database (best effort)
 console.log('Connecting to database...');
-db.connect()
-  .then(async () => {
+const MAX_DB_RETRIES = 5;
+const DB_RETRY_DELAY_MS = 3000;
+
+async function connectWithRetry(retries = MAX_DB_RETRIES) {
+  console.log('DB connect params:', {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    database: process.env.DB_DATABASE,
+    user: process.env.DB_USER,
+  });
+  try {
+    await db.connect();
     console.log('Database connected successfully.');
     try {
       await initSchema();
     } catch (err) {
       console.error('DB schema init error:', err.message || err);
     }
-  })
-  .catch(err => {
-    console.error('CRITICAL: DB connect failed!', err.message || err);
-    console.error('Check your .env variables (DB_USER, DB_HOST, DB_PASSWORD, etc.)');
-  });
+  } catch (err) {
+    console.error('DB connect failed:', err.message || err);
+    if (retries > 0) {
+      console.log(`Retrying database connection in ${DB_RETRY_DELAY_MS}ms... (${retries} retries left)`);
+      setTimeout(() => connectWithRetry(retries - 1), DB_RETRY_DELAY_MS);
+    } else {
+      console.error('CRITICAL: DB connect failed after retries.');
+      console.error('Check your .env variables (DB_USER, DB_HOST, DB_PASSWORD, etc.)');
+    }
+  }
+}
+
+connectWithRetry();
