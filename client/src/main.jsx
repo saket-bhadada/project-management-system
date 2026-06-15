@@ -7,6 +7,7 @@ import {
   Outlet,
 } from 'react-router-dom'
 import './index.css'
+import './theme.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Login from './login.jsx'
 import Registration from './registration.jsx'
