@@ -13,12 +13,12 @@ dotenv.config();
 //     delete process.env.PORT;
 // }
 
-const db = new pg.Client({
+const db = new pg.Pool({
   user: process.env.DB_USER || process.env.USER,
   host: process.env.DB_HOST || process.env.HOST,
   database: process.env.DB_DATABASE || process.env.DATABASE,
   password: process.env.DB_PASSWORD || process.env.PASSWORD,
-  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 5432,
+  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 5433,
 });
 
 // Handle unexpected errors on the client
@@ -138,7 +138,7 @@ export async function initSchema() {
         CREATE INDEX IF NOT EXISTS idx_project_files_message
           ON project_files(message_id);
         CREATE INDEX IF NOT EXISTS idx_project_file_versions_file
-          ON project_file_versions(file_id);
+          ON project_files_version(file_id);
       `);
     console.log("Database schema verified.");
   } catch (err) {

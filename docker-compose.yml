@@ -29,7 +29,7 @@ services:
     environment:
       - PORT=3000
       - DB_HOST=database
-      - DB_PORT=5432
+      - DB_PORT=5433
       - DB_USER=postgres
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_DATABASE=${DB_DATABASE}
@@ -39,7 +39,7 @@ services:
     image: postgres:18-alpine
     container_name: pms_db
     ports:
-      - "5433:5432"
+      - "5433:5433"
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -50,6 +50,15 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-    volumes:
-      - ./postgres-data:/var/lib/postgresql
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pms_pgadmin
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@example.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    depends_on:
+      - database
 

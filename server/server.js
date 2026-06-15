@@ -34,7 +34,8 @@ async function connectWithRetry(retries = MAX_DB_RETRIES) {
     user: process.env.DB_USER,
   });
   try {
-    await db.connect();
+    const client = await db.connect();
+    client.release();
     console.log('Database connected successfully.');
     try {
       await initSchema();
