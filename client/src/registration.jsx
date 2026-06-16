@@ -1,14 +1,36 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import './App.css'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
+import { fadeUp, scaleIn, ripple, appearBtn } from './lib/animate.js'
 
 function Registration() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [userType, setUserType] = useState('student') // store selected option
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const cardRef = useRef(null)
+  const btnRef = useRef(null)
+  const errorRef = useRef(null)
+
+  const navigate = useNavigate()
+
+  // Entrance animations on mount
+  useEffect(() => {
+    if (cardRef.current) fadeUp(cardRef.current)
+    if (btnRef.current) appearBtn(btnRef.current, 200)
+  }, [])
+
+  // Animate error message when it appears
+  useEffect(() => {
+    if (error && errorRef.current) scaleIn(errorRef.current)
+  }, [error])
 
   async function handleSubmit(e) {
     e.preventDefault()
+    setError('')
+    setLoading(true)
     try {
       const response = await fetch('/api/register', {
         method: 'POST',
@@ -23,116 +45,100 @@ function Registration() {
       if (response.ok && data.redirect) {
         navigate(data.redirect)
       } else if (!response.ok) {
-        alert(data.message || 'Registration failed')
+        setError(data.message || 'Registration failed')
       }
     } catch (error) {
       console.error('Registration failed:', error)
+      setError('Network error. Please try again.')
+    } finally {
+      setLoading(false)
     }
   }
-
-  const navigate = useNavigate()
 
   function handleGoogleButton() {
     console.log('google')
   }
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.title}>Register</h2>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={styles.input}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Enter your password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={styles.input}
-          required
-        />
+    <div className="auth-page">
+      {/* Left hero panel */}
+      <div className="auth-hero">
+        <div className="auth-hero-content">
+          <h1>Live PM</h1>
+          <p>Join the platform and start managing projects seamlessly.</p>
+        </div>
+      </div>
 
-        <select
-          value={userType}
-          onChange={(e) => setUserType(e.target.value)}
-          style={styles.select}
-          required
-        >
-          <option value="student">Student</option>
-          <option value="staff">Staff</option>
-        </select>
+      {/* Right form panel */}
+      <div className="auth-panel">
+        <div className="auth-card" ref={cardRef}>
+          <h2>Create Account</h2>
+          <p className="auth-subtitle">Get started in seconds</p>
 
-        <button type="submit" style={styles.button}>
-          Register
-        </button>
-      </form>
+          {error && (
+            <div className="error-message" ref={errorRef}>
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="auth-form">
+            <div className="form-group">
+              <input
+                type="email"
+                placeholder=" "
+                id="reg-email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <label htmlFor="reg-email">Email address</label>
+            </div>
+
+            <div className="form-group">
+              <input
+                type="password"
+                placeholder=" "
+                id="reg-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <label htmlFor="reg-password">Password</label>
+            </div>
+
+            <div className="form-group">
+              <select
+                id="reg-usertype"
+                value={userType}
+                onChange={(e) => setUserType(e.target.value)}
+                className="has-value"
+                required
+              >
+                <option value="student">Student</option>
+                <option value="staff">Staff</option>
+              </select>
+              <label htmlFor="reg-usertype">Role</label>
+            </div>
+
+            <button
+              type="submit"
+              className="auth-submit-btn"
+              ref={btnRef}
+              disabled={loading}
+              onClick={(e) => ripple(e.currentTarget, e)}
+            >
+              {loading && <span className="btn-spinner" />}
+              <span className="btn-label">{loading ? 'Creating account…' : 'Create Account'}</span>
+            </button>
+          </form>
+
+          <p className="auth-footer">
+            Already have an account? <Link to="/login">Sign in</Link>
+          </p>
+        </div>
+      </div>
     </div>
   )
-}
-
-const styles = {
-  container: {
-    width: '350px',
-    margin: '100px auto',
-    padding: '30px',
-    borderRadius: '10px',
-    backgroundColor: '#f8f9fa',
-    boxShadow: '0 0 15px rgba(0,0,0,0.1)',
-    textAlign: 'center',
-  },
-  title: {
-    marginBottom: '20px',
-    fontSize: '24px',
-    color: '#333',
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  input: {
-    margin: '10px 0',
-    padding: '12px',
-    fontSize: '16px',
-    borderRadius: '5px',
-    border: '1px solid #ccc',
-    outline: 'none',
-  },
-  select: {
-    margin: '10px 0',
-    padding: '12px',
-    fontSize: '16px',
-    borderRadius: '5px',
-    border: '1px solid #ccc',
-    backgroundColor: '#fff',
-    color: '#333',
-    outline: 'none',
-    cursor: 'pointer',
-  },
-  button: {
-    marginTop: '10px',
-    padding: '12px',
-    fontSize: '16px',
-    backgroundColor: '#007bff',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    transition: '0.3s',
-  },
-  signupText: {
-    marginTop: '15px',
-    fontSize: '14px',
-    color: '#555',
-  },
-  link: {
-    color: '#007bff',
-    textDecoration: 'none',
-  },
 }
 
 export default Registration

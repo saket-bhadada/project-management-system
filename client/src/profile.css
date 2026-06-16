@@ -1,247 +1,380 @@
-.profile-container {
-  width: 90%;
+/* ─── Profile Page ─── */
+
+.profile-page {
+  width: 92%;
   max-width: 900px;
-  margin: 2rem auto;
-  padding: 2.5rem;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(10px);
-  animation: slideIn 0.5s ease;
+  margin: var(--space-6) auto var(--space-8);
+  padding: 0;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.back-btn {
-  background: linear-gradient(135deg, var(--text-secondary), var(--text-light));
-  color: white;
-  padding: 0.6em 1.2em;
-  font-size: 0.95rem;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-bottom: 1.5rem;
+/* ─── Back Button ─── */
+.profile-back-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-2);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: var(--space-6);
+  margin-top: var(--space-5);
+  transition:
+    border-color 0.2s var(--ease-out),
+    color 0.2s var(--ease-out),
+    background 0.2s var(--ease-out),
+    transform 0.2s var(--ease-out);
+  overflow: hidden;
+  position: relative;
 }
 
-.back-btn:hover {
-  background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+.profile-back-btn:hover {
+  border-color: var(--color-border-hover);
+  color: var(--color-text-1);
   transform: translateX(-3px);
 }
 
-.profile-container h2 {
-  color: var(--primary-color);
-  font-size: 2.25rem;
-  margin-bottom: 1.5rem;
-  text-align: center;
-  border-bottom: 3px solid var(--primary-color);
-  padding-bottom: 0.75rem;
+/* ─── Heading ─── */
+.profile-page h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: var(--space-5);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.profile-container h3 {
-  color: var(--secondary-color);
-  font-size: 1.5rem;
-  margin: 2rem 0 1rem;
-  border-left: 4px solid var(--secondary-color);
-  padding-left: 1rem;
+/* ─── Two-column Layout ─── */
+.profile-layout {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: var(--space-6);
+  align-items: start;
 }
 
-/* User details section */
-.email, .type-of-user {
-  padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  border-left: 4px solid var(--secondary-color);
-  font-size: 1.05rem;
+@media (max-width: 768px) {
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
-.email strong, .type-of-user strong {
-  color: var(--text-primary);
-  margin-right: 0.5rem;
+/* ─── Skeleton ─── */
+.profile-skeleton {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: var(--space-6);
 }
 
-.profile-container hr {
+.profile-skeleton-left {
+  height: 180px;
+  border-radius: var(--radius-md);
+}
+
+.profile-skeleton-right {
+  height: 280px;
+  border-radius: var(--radius-md);
+}
+
+@media (max-width: 768px) {
+  .profile-skeleton {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── User Info Card (left) ─── */
+.profile-info-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+}
+
+.profile-info-item {
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.92rem;
+  color: var(--color-text-2);
+}
+
+.profile-info-item:last-child {
+  border-bottom: none;
+}
+
+.profile-info-item strong {
+  color: var(--color-text-1);
+  display: block;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 4px;
+}
+
+/* ─── Divider ─── */
+.profile-divider {
   border: none;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--border-color), transparent);
-  margin: 2rem 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+  margin: var(--space-5) 0;
 }
 
-/* Add message box */
-.add-message-box {
-  background: var(--bg-secondary);
-  padding: 1.5rem;
-  border-radius: 10px;
-  margin-bottom: 2rem;
-  border: 2px dashed var(--border-color);
-  transition: all 0.3s ease;
+/* ─── Section Headings ─── */
+.section-heading {
+  border-left: 3px solid var(--color-primary);
+  padding-left: var(--space-3);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--color-text-1);
+  margin-bottom: var(--space-5);
+  margin-top: 0;
 }
 
-.add-message-box:hover {
-  border-color: var(--primary-color);
-  background: var(--bg-primary);
+/* ─── Content Area (right) ─── */
+.profile-content-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
 }
 
-.add-message-box textarea {
+/* ─── Staff: Add Message Box ─── */
+.profile-add-message {
+  margin-bottom: var(--space-5);
+}
+
+.profile-textarea {
   width: 100%;
   min-height: 120px;
-  margin-bottom: 1rem;
-  padding: 1rem;
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
-  font-size: 1rem;
+  padding: var(--space-3);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-1);
+  font-size: 0.95rem;
   font-family: inherit;
   resize: vertical;
-  transition: all 0.3s ease;
+  margin-bottom: var(--space-3);
+  transition:
+    border-color 0.2s var(--ease-out),
+    box-shadow 0.2s var(--ease-out);
 }
 
-.add-message-box textarea:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px var(--primary-light);
+.profile-textarea:focus {
   outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-glow);
 }
 
-.add-message-box button {
+.profile-add-btn {
   width: 100%;
-  padding: 0.9em;
-  font-size: 1.05rem;
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
-  box-shadow: var(--shadow-md);
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    box-shadow 0.2s var(--ease-out),
+    transform 0.15s var(--ease-out);
+  overflow: hidden;
+  position: relative;
 }
 
-.add-message-box button:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+.profile-add-btn:hover {
+  box-shadow: 0 0 16px var(--color-primary-glow);
+  transform: translateY(-1px);
 }
 
-/* Messages list */
-.messages-list {
+/* ─── Staff: Message List ─── */
+.profile-messages-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-3);
 }
 
-.message-item {
-  padding: 1.5rem;
-  background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
-  border-radius: 10px;
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
+.profile-message-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   position: relative;
   overflow: hidden;
+  transition:
+    transform 0.25s var(--ease-out),
+    opacity 0.25s var(--ease-out),
+    border-color 0.2s var(--ease-out);
 }
 
-.message-item::before {
+.profile-message-item::before {
   content: '';
   position: absolute;
   left: 0;
   top: 0;
   height: 100%;
-  width: 4px;
-  background: linear-gradient(180deg, var(--success-color), var(--secondary-color));
+  width: 3px;
+  background: linear-gradient(180deg, var(--color-primary), var(--color-accent));
 }
 
-.message-item:hover {
-  transform: translateX(5px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--secondary-color);
+.profile-message-item:hover {
+  border-color: var(--color-border-hover);
 }
 
-.message-item p {
+.profile-message-item p {
   flex: 1;
   margin: 0;
-  color: var(--text-primary);
-  font-size: 1.05rem;
-  line-height: 1.6;
+  color: var(--color-text-1);
+  font-size: 0.95rem;
+  line-height: 1.55;
   word-break: break-word;
 }
 
-.delete-btn {
-  background: linear-gradient(135deg, var(--danger-color), #dc2626);
-  color: white;
-  padding: 0.6em 1.2em;
-  border-radius: 8px;
+.profile-delete-btn {
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
   border: none;
-  cursor: pointer;
-  font-size: 0.95rem;
+  background: rgba(255, 77, 109, 0.1);
+  color: var(--color-danger);
+  font-size: 0.82rem;
   font-weight: 600;
-  transition: all 0.3s ease;
+  cursor: pointer;
   white-space: nowrap;
+  transition:
+    background 0.2s var(--ease-out),
+    transform 0.15s var(--ease-out);
+  overflow: hidden;
+  position: relative;
 }
 
-.delete-btn:hover {
-  background: linear-gradient(135deg, #dc2626, #b91c1c);
-  transform: scale(1.05);
-  box-shadow: var(--shadow-md);
+.profile-delete-btn:hover {
+  background: rgba(255, 77, 109, 0.2);
+  transform: scale(1.03);
 }
 
-.delete-btn:active {
-  transform: scale(0.98);
-}
-
-/* Empty state */
-.messages-list > p {
+/* ─── Staff: No Messages ─── */
+.profile-no-messages {
   text-align: center;
-  padding: 3rem;
-  color: var(--text-secondary);
-  font-size: 1.1rem;
-  background: var(--bg-secondary);
-  border-radius: 10px;
-  border: 2px dashed var(--border-color);
+  padding: var(--space-6);
+  color: var(--color-text-3);
+  font-size: 0.95rem;
 }
 
-/* Loading state */
-.profile-container > p {
-  text-align: center;
-  padding: 2rem;
-  color: var(--text-secondary);
-  font-size: 1.1rem;
+/* ─── Student: Resume Section ─── */
+.resume-section-card {
+  margin-top: var(--space-4);
 }
 
-/* Responsive */
+.resume-section-card h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-1);
+  margin-bottom: var(--space-3);
+  border-left: 3px solid var(--color-primary);
+  padding-left: var(--space-3);
+}
+
+.resume-current {
+  margin-bottom: var(--space-4);
+  font-size: 0.92rem;
+  color: var(--color-text-2);
+}
+
+.resume-current a {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.resume-no-url {
+  color: var(--color-text-3);
+  font-size: 0.88rem;
+}
+
+.resume-update-row {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.resume-input {
+  flex: 1;
+  padding: 10px var(--space-3);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-1);
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition:
+    border-color 0.2s var(--ease-out),
+    box-shadow 0.2s var(--ease-out);
+}
+
+.resume-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-glow);
+}
+
+.resume-update-btn {
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    box-shadow 0.2s var(--ease-out),
+    transform 0.15s var(--ease-out);
+  overflow: hidden;
+  position: relative;
+}
+
+.resume-update-btn:hover {
+  box-shadow: 0 0 16px var(--color-primary-glow);
+  transform: translateY(-1px);
+}
+
+.resume-update-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.resume-update-btn.success-flash {
+  background: var(--color-success);
+}
+
+/* ─── Responsive ─── */
 @media (max-width: 768px) {
-  .profile-container {
+  .profile-page {
     width: 95%;
-    padding: 1.5rem;
-    margin: 1rem auto;
+    margin: var(--space-4) auto;
   }
 
-  .profile-container h2 {
-    font-size: 1.75rem;
+  .profile-page h2 {
+    font-size: 1.4rem;
   }
 
-  .profile-container h3 {
-    font-size: 1.25rem;
-  }
-
-  .message-item {
+  .profile-message-item {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .delete-btn {
+  .profile-delete-btn {
     width: 100%;
+    text-align: center;
   }
 
-  .add-message-box textarea {
-    min-height: 100px;
+  .resume-update-row {
+    flex-direction: column;
   }
 }

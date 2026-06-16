@@ -1,7 +1,8 @@
 .applications-container {
-    padding: 40px 20px;
-    max-width: 1000px;
-    margin: 0 auto;
+    width: 92%;
+    max-width: 860px;
+    margin: var(--space-6) auto var(--space-8);
+    padding: 0;
 }
 
 .applications-container h2 {

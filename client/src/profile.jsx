@@ -1,6 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "./profile.css";
+import PageTransition from "./components/PageTransition.jsx";
+import { fadeUp, slideInRight, appearBtn, ripple } from "./lib/animate.js";
+import animeModule from "animejs";
+import NavScrollExample from "./navbar.jsx";
+
+let anime = animeModule;
+if (anime && anime.default) {
+  anime = anime.default;
+}
 
 export default function Profile() {
     const navigate = useNavigate();
@@ -9,6 +18,13 @@ export default function Profile() {
     const [newMessage, setNewMessage] = useState("");
     const [resumeUrl, setResumeUrl] = useState("");
     const [isUpdatingResume, setIsUpdatingResume] = useState(false);
+    const [resumeSuccess, setResumeSuccess] = useState(false);
+
+    const backBtnRef = useRef(null);
+    const addBtnRef = useRef(null);
+    const deleteBtnsRef = useRef([]);
+    const messagesListRef = useRef(null);
+    const resumeBtnRef = useRef(null);
 
     async function loadProfile() {
         try {
@@ -40,7 +56,36 @@ export default function Profile() {
 
     useEffect(() => {
         loadProfile();
+        document.body.classList.add('light-theme');
+        return () => {
+            document.body.classList.remove('light-theme');
+        };
     }, []);
+
+    // Animate buttons on mount
+    useEffect(() => {
+        if (backBtnRef.current) appearBtn(backBtnRef.current, 0);
+    }, []);
+
+    useEffect(() => {
+        if (addBtnRef.current) appearBtn(addBtnRef.current, 100);
+    }, [user]);
+
+    useEffect(() => {
+        if (resumeBtnRef.current) appearBtn(resumeBtnRef.current, 100);
+    }, [user]);
+
+    // Animate message items after load
+    useEffect(() => {
+        if (messagesListRef.current && messages.length > 0) {
+            const items = messagesListRef.current.querySelectorAll('.profile-message-item');
+            if (items.length > 0) fadeUp(items, 60);
+        }
+        // Animate delete buttons
+        deleteBtnsRef.current.forEach((btn, i) => {
+            if (btn) appearBtn(btn, i * 50 + 200);
+        });
+    }, [messages, user]);
 
     async function addmessage(){
         if(!newMessage){
@@ -57,8 +102,17 @@ export default function Profile() {
             })
             const data = await response.json();
             if(data.success){
-                setMessages([...messages,data.message]);
+                const updatedMessages = [...messages, data.message];
+                setMessages(updatedMessages);
                 setNewMessage("");
+                // Animate the new message in
+                requestAnimationFrame(() => {
+                    if (messagesListRef.current) {
+                        const items = messagesListRef.current.querySelectorAll('.profile-message-item');
+                        const last = items[items.length - 1];
+                        if (last) slideInRight(last);
+                    }
+                });
             }
         }catch(err){
             console.error("Error adding message", err);
@@ -81,6 +135,8 @@ export default function Profile() {
             if (data.success) {
                 alert("Resume updated successfully!");
                 setUser({ ...user, resume_url: resumeUrl });
+                setResumeSuccess(true);
+                setTimeout(() => setResumeSuccess(false), 2000);
             } else {
                 alert("Failed to update resume: " + data.message);
             }
@@ -93,6 +149,22 @@ export default function Profile() {
     }
 
     async function deleteMessage(msgId) {
+        // Animate out before removing
+        const itemEl = document.querySelector(`[data-msg-id="${msgId}"]`);
+        if (itemEl && typeof anime === 'function') {
+            try {
+                await anime({
+                    targets: itemEl,
+                    translateX: [0, 40],
+                    opacity: [1, 0],
+                    duration: 280,
+                    easing: 'easeInQuad',
+                }).finished;
+            } catch (err) {
+                console.error("deleteMessage animation error:", err);
+            }
+        }
+
         try {
             const response = await fetch(`/api/messages/${msgId}`, {
                 method: "DELETE",
@@ -110,106 +182,142 @@ export default function Profile() {
     }
 
     return (
-        <div className="profile-container">
-            <button onClick={() => navigate('/home')} className="back-btn">← Back to Home</button>
-            <h2>My Profile</h2>
+        <>
+            <NavScrollExample />
+            <PageTransition>
+                <div className="profile-page">
+                <button
+                    ref={backBtnRef}
+                    onClick={() => navigate('/home')}
+                    className="profile-back-btn"
+                >
+                    <span className="btn-label">← Back to Home</span>
+                </button>
 
-            {/* USER DETAILS */}
-            {user ? (
-                <>
-                    <div className="email">
-                        <strong>Email:</strong> {user.email}
-                    </div>
+                <h2>My Profile</h2>
 
-                    <div className="type-of-user">
-                        <strong>User Type:</strong> {user.typeofuser}
-                    </div>
-                </>
-            ) : (
-                <p>Loading profile...</p>
-            )}
+                {/* USER DETAILS */}
+                {user ? (
+                    <div className="profile-layout">
+                        {/* LEFT: User Info */}
+                        <div className="profile-info-card">
+                            <div className="profile-info-item">
+                                <strong>Email</strong>
+                                {user.email}
+                            </div>
+                            <div className="profile-info-item">
+                                <strong>User Type</strong>
+                                {user.typeofuser}
+                            </div>
+                        </div>
 
-            <hr />
-
-            {/* ===========================
-                STUDENT VIEW
-            ============================ */}
-            {user?.typeofuser === "student" && (
-                <div className="student-section">
-                    <h3>Student Profile</h3>
-                    
-                    <div className="resume-section" style={{ marginTop: '20px', padding: '15px', border: '1px solid #ddd', borderRadius: '8px' }}>
-                        <h4>My Resume</h4>
-                        <div style={{ marginBottom: '15px' }}>
-                            {user.resume_url ? (
+                        {/* RIGHT: Content */}
+                        <div className="profile-content-card">
+                            {/* ===========================
+                                STUDENT VIEW
+                            ============================ */}
+                            {user?.typeofuser === "student" && (
                                 <div>
-                                    <p>Current Resume: <a href={user.resume_url} target="_blank" rel="noreferrer">View Resume</a></p>
+                                    <h3 className="section-heading">Student Profile</h3>
+                                    
+                                    <div className="resume-section-card">
+                                        <h4>My Resume</h4>
+                                        <div className="resume-current">
+                                            {user.resume_url ? (
+                                                <p>Current Resume: <a href={user.resume_url} target="_blank" rel="noreferrer">View Resume</a></p>
+                                            ) : (
+                                                <p className="resume-no-url">No resume uploaded yet.</p>
+                                            )}
+                                        </div>
+                                        
+                                        <div className="resume-update-row">
+                                            <input 
+                                                type="url" 
+                                                className="resume-input"
+                                                placeholder="Paste your resume URL (e.g. Google Drive link)" 
+                                                value={resumeUrl}
+                                                onChange={(e) => setResumeUrl(e.target.value)}
+                                            />
+                                            <button 
+                                                ref={resumeBtnRef}
+                                                className={`resume-update-btn${resumeSuccess ? ' success-flash' : ''}`}
+                                                onClick={updateResume} 
+                                                disabled={isUpdatingResume}
+                                            >
+                                                <span className="btn-label">
+                                                    {resumeSuccess ? "✓ Updated" : isUpdatingResume ? "Updating..." : "Update Resume"}
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                            ) : (
-                                <p style={{ color: '#888' }}>No resume uploaded yet.</p>
+                            )}
+
+                            {/* ===========================
+                                STAFF VIEW
+                            ============================ */}
+                            {user?.typeofuser === "staff" && (
+                                <>
+                                    <h3 className="section-heading">My Messages</h3>
+
+                                    {/* Add message */}
+                                    <div className="profile-add-message">
+                                        <textarea
+                                            className="profile-textarea"
+                                            value={newMessage}
+                                            onChange={(e) => setNewMessage(e.target.value)}
+                                            placeholder="Write a message..."
+                                        ></textarea>
+
+                                        <button
+                                            ref={addBtnRef}
+                                            className="profile-add-btn"
+                                            onClick={(e) => {
+                                                ripple(e.currentTarget, e);
+                                                addmessage();
+                                            }}
+                                        >
+                                            <span className="btn-label">Add Message</span>
+                                        </button>
+                                    </div>
+
+                                    {/* List messages */}
+                                    <div className="profile-messages-list" ref={messagesListRef}>
+                                        {messages.length > 0 ? (
+                                            messages.map((msg, idx) => (
+                                                <div
+                                                    key={msg.id}
+                                                    data-msg-id={msg.id}
+                                                    className="profile-message-item"
+                                                >
+                                                    <p>{msg.message_text}</p>
+
+                                                    {/* Delete only own messages */}
+                                                    <button
+                                                        ref={(el) => { deleteBtnsRef.current[idx] = el; }}
+                                                        className="profile-delete-btn"
+                                                        onClick={() => deleteMessage(msg.id)}
+                                                    >
+                                                        <span className="btn-label">Delete</span>
+                                                    </button>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="profile-no-messages">No messages uploaded.</p>
+                                        )}
+                                    </div>
+                                </>
                             )}
                         </div>
-                        
-                        <div className="update-resume" style={{ display: 'flex', gap: '10px' }}>
-                            <input 
-                                type="url" 
-                                placeholder="Paste your resume URL (e.g. Google Drive link)" 
-                                value={resumeUrl}
-                                onChange={(e) => setResumeUrl(e.target.value)}
-                                style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
-                            />
-                            <button 
-                                onClick={updateResume} 
-                                disabled={isUpdatingResume}
-                                style={{ padding: '8px 16px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                            >
-                                {isUpdatingResume ? "Updating..." : "Update Resume"}
-                            </button>
-                        </div>
                     </div>
-                </div>
-            )}
-
-            {/* ===========================
-                STAFF VIEW
-            ============================ */}
-            {user?.typeofuser === "staff" && (
-                <>
-                    <h3>My Messages</h3>
-
-                    {/* Add message */}
-                    <div className="add-message-box">
-                        <textarea
-                            value={newMessage}
-                            onChange={(e) => setNewMessage(e.target.value)}
-                            placeholder="Write a message..."
-                        ></textarea>
-
-                        <button onClick={addmessage}>Add Message</button>
+                ) : (
+                    <div className="profile-skeleton">
+                        <div className="skeleton profile-skeleton-left" />
+                        <div className="skeleton profile-skeleton-right" />
                     </div>
-
-                    {/* List messages */}
-                    <div className="messages-list">
-                        {messages.length > 0 ? (
-                            messages.map((msg) => (
-                                <div key={msg.id} className="message-item">
-                                    <p>{msg.message_text}</p>
-
-                                    {/* Delete only own messages */}
-                                    <button
-                                        className="delete-btn"
-                                        onClick={() => deleteMessage(msg.id)}
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
-                            ))
-                        ) : (
-                            <p>No messages uploaded.</p>
-                        )}
-                    </div>
-                </>
-            )}
-        </div>
+                )}
+            </div>
+            </PageTransition>
+        </>
     );
 }

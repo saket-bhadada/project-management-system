@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { getWebSocketURL } from "./config";
 import "./workspace.css";
+import { appearBtn } from "./lib/animate.js";
 
 // Reusable hook to check user session
 function useAuth() {
@@ -22,7 +24,6 @@ function useAuth() {
 
 export default function Workspace() {
   const { messageId } = useParams();
-  const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
 
   // State Management
@@ -62,6 +63,20 @@ export default function Workspace() {
   const textareaRef = useRef(null);
   const lineCounterRef = useRef(null);
 
+  // Button refs for entrance animations
+  const buttonsInitRef = useRef(false);
+  const workspaceRootRef = useRef(null);
+
+  useEffect(() => {
+    if (!buttonsInitRef.current && workspaceRootRef.current) {
+      const buttons = workspaceRootRef.current.querySelectorAll('button');
+      buttons.forEach((btn, index) => {
+        appearBtn(btn, index * 20);
+      });
+      buttonsInitRef.current = true;
+    }
+  });
+
   // Sync scroll between line numbers and textarea
   const handleScroll = () => {
     if (textareaRef.current && lineCounterRef.current) {
@@ -88,7 +103,7 @@ export default function Workspace() {
         const errData = await response.json().catch(() => ({}));
         setError(errData.message || "Failed to load files.");
       }
-    } catch (err) {
+    } catch {
       setError("Failed to fetch files from server.");
     } finally {
       setLoadingFiles(false);
@@ -300,8 +315,7 @@ export default function Workspace() {
   useEffect(() => {
     if (!roomId || !showChat) return;
 
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const ws = new WebSocket(`${protocol}//${window.location.host}/ws/chat`);
+    const ws = new WebSocket(getWebSocketURL('/ws/chat'));
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -386,7 +400,7 @@ export default function Workspace() {
   }
 
   return (
-    <div className="workspace-root dark-mode">
+    <div className="workspace-root dark-mode" ref={workspaceRootRef}>
       
       {/* ── TOP HEADER BAR ── */}
       <header className="workspace-header">
@@ -409,13 +423,13 @@ export default function Workspace() {
             onClick={() => { setShowActivities(!showActivities); fetchActivity(); }}
             title="Project Activity Feed"
           >
-            📋 Activity Logs
+            <span className="btn-label">📋 Activity Logs</span>
           </button>
           <button 
             className={`workspace-icon-btn chat-toggle-btn ${showChat ? "active" : ""}`}
             onClick={toggleChat}
           >
-            💬 Room Chat {showChat ? "✕" : ""}
+            <span className="btn-label">💬 Room Chat {showChat ? "✕" : ""}</span>
           </button>
         </div>
       </header>
@@ -428,7 +442,7 @@ export default function Workspace() {
           <div className="sidebar-section-header">
             <span>Files Explorer</span>
             <button className="create-file-btn" onClick={() => setShowNewFileModal(true)}>
-              + Add File
+              <span className="btn-label">+ Add File</span>
             </button>
           </div>
 
@@ -440,7 +454,9 @@ export default function Workspace() {
             ) : files.length === 0 ? (
               <div className="empty-files-hint">
                 <p>No project files found.</p>
-                <button onClick={() => setShowNewFileModal(true)}>Create one now</button>
+                <button onClick={() => setShowNewFileModal(true)}>
+                  <span className="btn-label">Create one now</span>
+                </button>
               </div>
             ) : (
               Object.keys(fileTree).map((dirPath) => (
@@ -483,7 +499,7 @@ export default function Workspace() {
                   <span className="file-lang-pill">{selectedFile.language}</span>
                 </div>
                 <button className="delete-file-btn" onClick={handleDeleteFile} title="Delete File">
-                  🗑️ Delete File
+                  <span className="btn-label">🗑️ Delete File</span>
                 </button>
               </div>
 
@@ -534,7 +550,7 @@ export default function Workspace() {
                   onClick={handleSaveFile}
                   disabled={loadingContent}
                 >
-                  💾 Save & Commit Changes
+                  <span className="btn-label">💾 Save & Commit Changes</span>
                 </button>
               </div>
             </div>
@@ -544,7 +560,7 @@ export default function Workspace() {
               <h3>Collaborative Coding Workspace</h3>
               <p>Select a file from the explorer on the left to start editing, or create a brand new file to share with other participants.</p>
               <button className="workspace-btn btn-primary" onClick={() => setShowNewFileModal(true)}>
-                + Create New File
+                <span className="btn-label">+ Create New File</span>
               </button>
             </div>
           )}
@@ -588,11 +604,19 @@ export default function Workspace() {
 
       </div>
 
+      {/* Backdrop for sliding drawers */}
+      <div 
+        className={`workspace-backdrop ${showChat || showActivities ? "show" : ""}`}
+        onClick={() => { setShowChat(false); setShowActivities(false); }}
+      />
+
       {/* ── FLOATING/SLIDING ROOM CHAT PANEL ── */}
       <div className={`sliding-chat-drawer ${showChat ? "open" : ""}`}>
         <div className="chat-drawer-header">
           <span>💬 Collaboration Chat</span>
-          <button className="close-drawer-btn" onClick={() => setShowChat(false)}>✕</button>
+          <button className="close-drawer-btn" onClick={() => setShowChat(false)}>
+            <span className="btn-label">✕</span>
+          </button>
         </div>
 
         {/* Chat Drawer Sidebar lists room participants */}
@@ -634,7 +658,9 @@ export default function Workspace() {
             onChange={(e) => setChatInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSendChatMessage()}
           />
-          <button className="drawer-send-btn" onClick={handleSendChatMessage}>Send</button>
+          <button className="drawer-send-btn" onClick={handleSendChatMessage}>
+            <span className="btn-label">Send</span>
+          </button>
         </div>
       </div>
 
@@ -642,7 +668,9 @@ export default function Workspace() {
       <div className={`sliding-activity-drawer ${showActivities ? "open" : ""}`}>
         <div className="drawer-header">
           <span>📊 Recent Project Activity Logs</span>
-          <button className="close-drawer-btn" onClick={() => setShowActivities(false)}>✕</button>
+          <button className="close-drawer-btn" onClick={() => setShowActivities(false)}>
+            <span className="btn-label">✕</span>
+          </button>
         </div>
         <div className="activity-drawer-body">
           {loadingActivities ? (
@@ -735,10 +763,10 @@ export default function Workspace() {
 
               <div className="modal-buttons">
                 <button type="button" className="workspace-btn btn-secondary" onClick={() => setShowNewFileModal(false)}>
-                  Cancel
+                  <span className="btn-label">Cancel</span>
                 </button>
                 <button type="submit" className="workspace-btn btn-primary">
-                  Create File
+                  <span className="btn-label">Create File</span>
                 </button>
               </div>
             </form>

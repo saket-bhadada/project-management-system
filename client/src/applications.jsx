@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NavScrollExample from "./navbar.jsx";
+import PageTransition from "./components/PageTransition.jsx";
 import "./applications.css";
 
 function Applications() {
@@ -43,6 +44,10 @@ function Applications() {
       }
     }
     loadUserProfile();
+    document.body.classList.add('light-theme');
+    return () => {
+      document.body.classList.remove('light-theme');
+    };
   }, [navigate]);
 
   // Load applicants for a message
@@ -108,23 +113,32 @@ function Applications() {
   }
 
   if (loading) return (
-    <div>
+    <>
       <NavScrollExample />
-      <div style={{ padding: "20px" }}>Loading...</div>
-    </div>
+      <PageTransition>
+        <div className="applications-container">
+          <p>Loading applications...</p>
+        </div>
+      </PageTransition>
+    </>
   );
 
   if (error) return (
-    <div>
+    <>
       <NavScrollExample />
-      <div style={{ padding: "20px", color: "red" }}>{error}</div>
-    </div>
+      <PageTransition>
+        <div className="applications-container">
+          <p style={{ color: "var(--color-danger)" }}>{error}</p>
+        </div>
+      </PageTransition>
+    </>
   );
 
   return (
-    <div>
+    <>
       <NavScrollExample />
-      <div className="applications-container">
+      <PageTransition>
+        <div className="applications-container">
         <h2>View Applications</h2>
         <p className="user-info">Welcome, {user?.email}</p>
 
@@ -243,8 +257,9 @@ function Applications() {
             ))}
           </div>
         )}
-      </div>
-    </div>
+        </div>
+      </PageTransition>
+    </>
   );
 }
 

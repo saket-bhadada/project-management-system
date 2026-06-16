@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { getWebSocketURL } from "./config";
 import "./project.css";
+import { appearBtn } from "./lib/animate.js";
+
 
 // ── Language detection ──
 const detectLang = (filename) => {
@@ -51,7 +54,7 @@ const LANG_COLORS = {
 };
 
 // ── Hooks ──
-function useProjectWS(projectId, userId) {
+function useProjectWS(projectId) {
   const wsRef = useRef(null);
   const [online, setOnline] = useState([]);
   const [wsReady, setWsReady] = useState(false);
@@ -59,8 +62,7 @@ function useProjectWS(projectId, userId) {
 
   useEffect(() => {
     if (!projectId) return;
-    const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const ws = new WebSocket(`${proto}//${window.location.host}/ws/project`);
+    const ws = new WebSocket(getWebSocketURL('/ws/project'));
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -119,9 +121,21 @@ export default function ProjectManager() {
 
   const editorRef = useRef(null);
   const saveTimerRef = useRef(null);
+  const rootRef = useRef(null);
   const userId = user?.id;
 
-  const { online, wsReady, send, on, off } = useProjectWS(messageId, userId);
+  const { online, wsReady, send, on, off } = useProjectWS(messageId);
+
+  // Trigger button animations when they mount
+  useEffect(() => {
+    if (rootRef.current) {
+      const buttons = rootRef.current.querySelectorAll('button:not([data-animated])');
+      buttons.forEach((btn, i) => {
+        btn.setAttribute('data-animated', 'true');
+        appearBtn(btn, i * 20);
+      });
+    }
+  });
 
   // Load user
   useEffect(() => {
@@ -404,21 +418,23 @@ export default function ProjectManager() {
     );
 
   return (
-    <div className="pm-root">
+    <div className="pm-root" ref={rootRef}>
       {/* ── TOP BAR ── */}
       <header className="pm-topbar">
         <div className="pm-topbar-left">
           <button className="pm-back-btn" onClick={() => navigate(-1)}>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
+            <span className="btn-label">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </span>
           </button>
           <div className="pm-project-title">
             <svg
@@ -489,16 +505,18 @@ export default function ProjectManager() {
             onClick={() => setShowActivity((v) => !v)}
             title="Activity"
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-            </svg>
+            <span className="btn-label">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+            </span>
           </button>
 
           {/* Save button */}
@@ -507,19 +525,21 @@ export default function ProjectManager() {
               className="pm-save-btn"
               onClick={() => saveFile(activeFileId, content, "Manual save")}
             >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-              >
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                <polyline points="17 21 17 13 7 13 7 21" />
-                <polyline points="7 3 7 8 15 8" />
-              </svg>
-              Save
+              <span className="btn-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                  <polyline points="17 21 17 13 7 13 7 21" />
+                  <polyline points="7 3 7 8 15 8" />
+                </svg>
+                Save
+              </span>
             </button>
           )}
         </div>
@@ -535,17 +555,19 @@ export default function ProjectManager() {
               onClick={() => setShowNewFile((v) => !v)}
               title="New file"
             >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-              >
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
+              <span className="btn-label">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+              </span>
             </button>
           </div>
 
@@ -571,13 +593,13 @@ export default function ProjectManager() {
               />
               <div className="pm-new-file-actions">
                 <button className="pm-new-file-create" onClick={createFile}>
-                  Create
+                  <span className="btn-label">Create</span>
                 </button>
                 <button
                   className="pm-new-file-cancel"
                   onClick={() => setShowNewFile(false)}
                 >
-                  Cancel
+                  <span className="btn-label">Cancel</span>
                 </button>
               </div>
             </div>
@@ -638,7 +660,7 @@ export default function ProjectManager() {
                           onClick={(e) => deleteFile(file.id, e)}
                           title="Delete file"
                         >
-                          ×
+                          <span className="btn-label">×</span>
                         </button>
                       </div>
                     );
@@ -666,7 +688,7 @@ export default function ProjectManager() {
                   className="pm-create-first"
                   onClick={() => setShowNewFile(true)}
                 >
-                  Create first file
+                  <span className="btn-label">Create first file</span>
                 </button>
               </div>
             )}
@@ -704,18 +726,20 @@ export default function ProjectManager() {
                     </div>
                   ))}
                   <button className="pm-history-btn" onClick={loadHistory}>
-                    <svg
-                      width="13"
-                      height="13"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <polyline points="1 4 1 10 7 10" />
-                      <path d="M3.51 15a9 9 0 1 0 .49-4.95" />
-                    </svg>
-                    History
+                    <span className="btn-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <svg
+                        width="13"
+                        height="13"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <polyline points="1 4 1 10 7 10" />
+                        <path d="M3.51 15a9 9 0 1 0 .49-4.95" />
+                      </svg>
+                      History
+                    </span>
                   </button>
                   <span className="pm-shortcut">⌘S to save</span>
                 </div>
@@ -791,7 +815,7 @@ export default function ProjectManager() {
                 className="pm-close-panel"
                 onClick={() => setShowActivity(false)}
               >
-                ×
+                <span className="btn-label">×</span>
               </button>
             </div>
             <div className="pm-activity-list">
@@ -837,7 +861,7 @@ export default function ProjectManager() {
                 className="pm-close-panel"
                 onClick={() => setShowHistory(false)}
               >
-                ×
+                <span className="btn-label">×</span>
               </button>
             </div>
             <div className="pm-history-list">

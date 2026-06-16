@@ -1,83 +1,88 @@
-.status-container {
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 40px;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(12px);
-  border-radius: 24px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  animation: fadeIn 0.5s ease-out;
+/* ─── Status Page ─── */
+
+.status-page {
+  width: 92%;
+  max-width: 860px;
+  margin: var(--space-6) auto var(--space-8);
+  padding: 0;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.status-header {
-  margin-bottom: 40px;
-  text-align: left;
-  border-bottom: 2px solid var(--bg-tertiary);
-  padding-bottom: 20px;
+/* ─── Back Link (styled as button) ─── */
+.status-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-2);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: var(--space-6);
+  transition:
+    border-color 0.2s var(--ease-out),
+    color 0.2s var(--ease-out),
+    transform 0.2s var(--ease-out);
+  overflow: hidden;
   position: relative;
 }
 
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  font-weight: 600;
-  text-decoration: none;
-  margin-bottom: 16px;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  width: fit-content;
-  background: #4f46e5;
-  padding: 10px;
-  border-radius: 12px;
-  color: white;
+.status-back-btn:hover {
+  border-color: var(--color-border-hover);
+  color: var(--color-text-1);
+  transform: translateX(-3px);
 }
 
-.back-link:hover {
-  color: var(--primary-color);
-  transform: translateX(-4px);
-  color: white;
+/* ─── Header ─── */
+.status-header {
+  margin-bottom: var(--space-7);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .status-header h2 {
-  font-size: 2.2rem;
-  background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 8px;
+  background-clip: text;
 }
 
 .status-header p {
-  color: var(--text-secondary);
-  font-size: 1.1rem;
+  color: var(--color-text-2);
+  font-size: 0.95rem;
 }
 
+/* ─── Status List ─── */
 .status-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--space-5);
 }
 
+/* ─── Status Card ─── */
 .status-card {
-  background: var(--bg-primary);
-  border-radius: 20px;
-  padding: 24px;
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid var(--border-color);
-  position: relative;
+  padding: var(--space-5);
+  padding-left: calc(var(--space-5) + 6px);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   overflow: hidden;
+  /* Start invisible for staggerCards */
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    border-color 0.25s var(--ease-out),
+    transform 0.25s var(--ease-out),
+    box-shadow 0.25s var(--ease-out);
 }
 
 .status-card::before {
@@ -87,121 +92,166 @@
   top: 0;
   height: 100%;
   width: 6px;
-  background: var(--border-color);
-  transition: width 0.3s ease;
+  background: var(--color-border);
+  transition: width 0.3s var(--ease-out);
 }
 
-.status-card.accepted::before { background: var(--success-color); }
-.status-card.rejected::before { background: var(--danger-color); }
-.status-card.pending::before { background: var(--warning-color); }
+.status-card.accepted::before { background: var(--color-success); }
+.status-card.rejected::before { background: var(--color-danger); }
+.status-card.pending::before  { background: var(--color-warning); }
 
 .status-card:hover {
-  transform: translateX(8px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--primary-light);
+  border-color: var(--color-border-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
+/* ─── Status Info ─── */
 .status-info {
   flex: 1;
-  padding-right: 20px;
+  padding-right: var(--space-5);
 }
 
 .status-message {
-  font-size: 1.1rem;
+  font-size: 1.02rem;
   font-weight: 500;
-  color: var(--text-primary);
-  margin-bottom: 12px;
+  color: var(--color-text-1);
+  margin-bottom: var(--space-3);
   line-height: 1.5;
 }
 
 .status-meta {
   display: flex;
-  gap: 24px;
+  gap: var(--space-5);
   align-items: center;
 }
 
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
+  gap: var(--space-2);
+  font-size: 0.88rem;
+  color: var(--color-text-2);
 }
 
+/* ─── Status Badge ─── */
 .status-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
-  border-radius: 12px;
-  font-size: 0.8rem;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 0.76rem;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 
 .status-badge.accepted {
-  background: #ecfdf5;
-  color: #065f46;
+  background: rgba(0, 214, 143, 0.12);
+  color: var(--color-success);
+  animation: acceptedPulse 2.5s ease-in-out infinite;
 }
 
 .status-badge.rejected {
-  background: #fef2f2;
-  color: #991b1b;
+  background: rgba(255, 77, 109, 0.10);
+  color: var(--color-danger);
 }
 
 .status-badge.pending {
-  background: #fffbeb;
-  color: #92400e;
+  background: rgba(255, 178, 36, 0.12);
+  color: var(--color-warning);
 }
 
+@keyframes acceptedPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 214, 143, 0); }
+  50%      { box-shadow: 0 0 12px 4px rgba(0, 214, 143, 0.15); }
+}
+
+/* ─── Chat Button ─── */
 .chat-action {
   flex-shrink: 0;
 }
 
 .chat-btn {
-  background: var(--primary-color);
-  color: white;
-  padding: 12px 24px;
-  border-radius: 12px;
-  font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 10px;
-  transition: all 0.3s ease;
+  gap: var(--space-2);
+  padding: 10px 22px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    box-shadow 0.25s var(--ease-out),
+    transform 0.15s var(--ease-out);
+  overflow: hidden;
+  position: relative;
 }
 
 .chat-btn:hover {
-  background: var(--primary-hover);
-  transform: scale(1.05);
+  box-shadow: 0 4px 20px var(--color-primary-glow);
+  transform: scale(1.04);
 }
 
-.empty-state {
+/* ─── Empty State ─── */
+.status-empty {
   text-align: center;
-  padding: 60px 40px;
-  background: var(--bg-secondary);
-  border-radius: 20px;
-  border: 2px dashed var(--border-color);
+  padding: var(--space-8) var(--space-5);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  opacity: 0; /* for fadeIn */
 }
 
-.empty-icon {
-  font-size: 4rem;
-  margin-bottom: 24px;
-  display: block;
+.status-empty-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto var(--space-5);
+  opacity: 0.4;
 }
 
-.empty-state h3 {
-  color: var(--text-primary);
-  margin-bottom: 12px;
+.status-empty h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-text-1);
+  margin-bottom: var(--space-2);
 }
 
-.empty-state p {
-  color: var(--text-secondary);
-  max-width: 300px;
-  margin: 0 auto;
+.status-empty p {
+  color: var(--color-text-3);
+  max-width: 320px;
+  margin: 0 auto var(--space-5);
+  font-size: 0.92rem;
 }
 
-.loading-container, .error-container {
+.status-browse-btn {
+  padding: 10px 24px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    box-shadow 0.2s var(--ease-out),
+    transform 0.15s var(--ease-out);
+  overflow: hidden;
+  position: relative;
+}
+
+.status-browse-btn:hover {
+  box-shadow: 0 0 16px var(--color-primary-glow);
+  transform: translateY(-1px);
+}
+
+/* ─── Loading / Error ─── */
+.status-loading,
+.status-error {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -210,40 +260,72 @@
   text-align: center;
 }
 
-.loader {
-  width: 48px;
-  height: 48px;
-  border: 5px solid var(--primary-light);
-  border-bottom-color: var(--primary-color);
-  border-radius: 50%;
-  display: inline-block;
-  box-sizing: border-box;
-  animation: rotation 1s linear infinite;
-  margin-bottom: 20px;
+.status-loading p,
+.status-error p {
+  color: var(--color-text-2);
+  margin-top: var(--space-4);
 }
 
-@keyframes rotation {
+.status-error h3 {
+  color: var(--color-text-1);
+  margin-bottom: var(--space-2);
+}
+
+.status-loader {
+  width: 42px;
+  height: 42px;
+  border: 3px solid var(--color-surface-2);
+  border-bottom-color: var(--color-primary);
+  border-radius: 50%;
+  display: inline-block;
+  animation: statusSpin 0.9s linear infinite;
+}
+
+@keyframes statusSpin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
+.status-retry-btn {
+  padding: 10px 22px;
+  margin-top: var(--space-5);
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    box-shadow 0.2s var(--ease-out),
+    transform 0.15s var(--ease-out);
+  overflow: hidden;
+  position: relative;
+}
+
+.status-retry-btn:hover {
+  box-shadow: 0 0 16px var(--color-primary-glow);
+  transform: translateY(-1px);
+}
+
+/* ─── Responsive ─── */
 @media (max-width: 640px) {
   .status-card {
     flex-direction: column;
     align-items: flex-start;
-    gap: 20px;
+    gap: var(--space-4);
   }
-  
+
   .status-meta {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: var(--space-2);
   }
-  
+
   .chat-action {
     width: 100%;
   }
-  
+
   .chat-btn {
     width: 100%;
     justify-content: center;

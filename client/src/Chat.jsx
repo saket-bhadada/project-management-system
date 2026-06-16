@@ -1,6 +1,9 @@
 import React from 'react';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { getWebSocketURL } from './config';
+import { fadeIn, slideInLeft, appearBtn } from './lib/animate.js';
+import './chat.css';
 
 // ─────────────────────────────────────────────
 // HOOKS
@@ -34,8 +37,7 @@ function useChat(roomId) {
   useEffect(() => {
     if (!roomId) return;
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${protocol}//${window.location.host}/ws/chat`);
+    const ws = new WebSocket(getWebSocketURL('/ws/chat'));
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -116,12 +118,32 @@ export default function Chat({ messageId: propMessageId }) {
   const [roomError, setRoomError]       = useState(null);
   const [participants, setParticipants] = useState([]);
   const [input, setInput]               = useState('');
+  const [isSending, setIsSending]       = useState(false);
   const bottomRef                       = useRef(null);
+
+  // Track history message IDs so we only animate NEW ws messages
+  const historyIdsRef = useRef(new Set());
+  const participantsContainerRef = useRef(null);
+  const emptyRef = useRef(null);
+  const sendBtnRef = useRef(null);
+  const loadMoreBtnRef = useRef(null);
+  const workspaceLinkRef = useRef(null);
+  const buttonsInitRef = useRef(false);
 
   const {
     messages, online, loading, error,
     send, loadMore, remove
   } = useChat(roomId);
+
+  // Track which messages came from history load
+  useEffect(() => {
+    if (!loading && messages.length > 0 && historyIdsRef.current.size === 0) {
+      // First load: mark all current messages as history
+      messages.forEach(m => {
+        if (m.id) historyIdsRef.current.add(m.id);
+      });
+    }
+  }, [loading, messages]);
 
   // Fetch roomId for this message
   useEffect(() => {
@@ -146,6 +168,33 @@ export default function Chat({ messageId: propMessageId }) {
       });
   }, [roomId]);
 
+  // Animate participants on mount with slideInLeft stagger
+  useEffect(() => {
+    if (participants.length > 0 && participantsContainerRef.current) {
+      const rows = participantsContainerRef.current.querySelectorAll('.chat-participant-row');
+      if (rows.length) slideInLeft(rows, 50);
+    }
+  }, [participants]);
+
+  // Animate empty state with fadeIn
+  useEffect(() => {
+    if (!messageId && emptyRef.current) {
+      fadeIn(emptyRef.current);
+    }
+  }, [messageId]);
+
+  // appearBtn on mount for all buttons
+  useEffect(() => {
+    if (buttonsInitRef.current) return;
+    const timer = setTimeout(() => {
+      if (sendBtnRef.current) appearBtn(sendBtnRef.current, 0);
+      if (loadMoreBtnRef.current) appearBtn(loadMoreBtnRef.current, 40);
+      if (workspaceLinkRef.current) appearBtn(workspaceLinkRef.current, 80);
+      buttonsInitRef.current = true;
+    }, 100);
+    return () => clearTimeout(timer);
+  });
+
   // Auto scroll to bottom on new message
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -155,6 +204,9 @@ export default function Chat({ messageId: propMessageId }) {
     if (!input.trim()) return;
     send(input.trim());
     setInput('');
+    // Brief spring press animation
+    setIsSending(true);
+    setTimeout(() => setIsSending(false), 300);
   };
 
   const handleRemove = (userId) => {
@@ -165,133 +217,117 @@ export default function Chat({ messageId: propMessageId }) {
 
   // ── LOADING STATES ──
   if (authLoading)
-    return <p style={styles.center}>Checking session...</p>;
+    return <p className="chat-center-text">Checking session...</p>;
 
   if (!user)
-    return <p style={styles.center}>You are not logged in.</p>;
+    return <p className="chat-center-text">You are not logged in.</p>;
 
   if (!messageId)
     return (
-      <div style={styles.emptyWrapper}>
-        <div style={styles.emptyIcon}>💬</div>
-        <p style={styles.emptyTitle}>No chat selected</p>
-        <p style={styles.emptyText}>
+      <div className="chat-empty-wrapper" ref={emptyRef}>
+        <div className="chat-empty-icon">💬</div>
+        <p className="chat-empty-title">No chat selected</p>
+        <p className="chat-empty-text">
           Select a chat from your applications or status page to begin messaging.
         </p>
       </div>
     );
 
   if (roomError)
-    return <p style={{ ...styles.center, color: 'red' }}>{roomError}</p>;
+    return <p className="chat-center-text error">{roomError}</p>;
 
   if (!roomId)
-    return <p style={styles.center}>Loading chat room...</p>;
+    return <p className="chat-center-text">Loading chat room...</p>;
+
+  // Helper: is this a NEW message from WebSocket?
+  const isNewMessage = (msg) => {
+    if (!msg.id) return true; // no id = definitely ws-pushed
+    return !historyIdsRef.current.has(msg.id);
+  };
 
   // ── MAIN UI ──
   return (
-    <div style={styles.wrapper}>
+    <div className="chat-wrapper">
 
       {/* ── LEFT PANEL — Participants ── */}
-      <div style={styles.sidebar}>
-        <div style={styles.sidebarHeader}>
+      <div className="chat-sidebar">
+        <div className="chat-sidebar-header">
           Participants
-          <span style={styles.onlineBadge}>{online.length} online</span>
+          <span className="chat-online-badge">{online.length} online</span>
         </div>
 
-        {participants.map(p => (
-          <div key={p.id} style={styles.participantRow}>
-            <div style={styles.participantInfo}>
-              <div style={{
-                ...styles.onlineDot,
-                background: online.includes(p.id) ? '#22c55e' : '#d1d5db'
-              }}/>
-              <span style={styles.participantEmail}>{p.email}</span>
+        <div ref={participantsContainerRef}>
+          {participants.map(p => (
+            <div key={p.id} className="chat-participant-row">
+              <div className="chat-participant-info">
+                <div className="chat-participant-avatar">
+                  {p.email ? p.email[0].toUpperCase() : '?'}
+                  <div className={`chat-online-dot ${online.includes(p.id) ? 'is-online' : 'is-offline'}`} />
+                </div>
+                <span className="chat-participant-email">{p.email}</span>
+              </div>
+              {p.id !== user.id && (
+                <button
+                  className="chat-remove-btn"
+                  onClick={() => handleRemove(p.id)}
+                >
+                  <span className="btn-label">✕</span>
+                </button>
+              )}
             </div>
-            {p.id !== user.id && (
-              <button
-                style={styles.removeBtn}
-                onClick={() => handleRemove(p.id)}
-              >
-                ✕
-              </button>
-            )}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* ── RIGHT PANEL — Messages ── */}
-      <div style={styles.chatPanel}>
+      <div className="chat-panel">
 
         {/* Header */}
-        <div style={{ ...styles.chatHeader, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="chat-panel-header">
           <span>Chat Room</span>
           <Link
+            ref={workspaceLinkRef}
             to={`/chats/${messageId}/workspace`}
-            style={{
-              padding: '6px 14px',
-              background: '#14b8a6',
-              color: '#fff',
-              borderRadius: '8px',
-              textDecoration: 'none',
-              fontSize: '12px',
-              fontWeight: '600',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 2px 6px rgba(20, 184, 166, 0.2)',
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.background = '#0d9488';
-              e.currentTarget.style.transform = 'translateY(-1px)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.background = '#14b8a6';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
+            className="chat-workspace-link"
           >
-            📁 Code Workspace
+            <span className="btn-label">📁 Code Workspace</span>
           </Link>
         </div>
 
         {/* Load more */}
-        <button style={styles.loadMoreBtn} onClick={loadMore}>
-          Load older messages
+        <button
+          ref={loadMoreBtnRef}
+          className="chat-load-more-btn"
+          onClick={loadMore}
+        >
+          <span className="btn-label">Load older messages</span>
         </button>
 
         {/* Message thread */}
-        <div style={styles.messageList}>
-          {loading && <p style={styles.center}>Loading messages...</p>}
-          {error   && <p style={{ ...styles.center, color: 'red' }}>{error}</p>}
+        <div className="chat-message-list">
+          {loading && <p className="chat-center-text">Loading messages...</p>}
+          {error   && <p className="chat-center-text error">{error}</p>}
 
           {messages.map(msg => {
             const isOwn = msg.sender_email === user.email;
+            const isNew = isNewMessage(msg);
+            // Mark new messages as seen in history after rendering
+            if (msg.id && isNew) {
+              historyIdsRef.current.add(msg.id);
+            }
             return (
               <div
                 key={msg.id}
-                style={{
-                  ...styles.messageRow,
-                  justifyContent: isOwn ? 'flex-end' : 'flex-start'
-                }}
+                className={`chat-message-row ${isOwn ? 'is-own' : 'is-other'}${isNew ? ' is-new' : ''}`}
               >
-                <div style={styles.messageGroup}>
+                <div className="chat-message-group">
                   {!isOwn && (
-                    <div style={styles.senderLabel}>{msg.sender_email}</div>
+                    <div className="chat-sender-label">{msg.sender_email}</div>
                   )}
-                  <div style={{
-                    ...styles.bubble,
-                    background:   isOwn ? '#0084ff' : '#f0f0f0',
-                    color:        isOwn ? '#fff'    : '#000',
-                    borderRadius: isOwn
-                      ? '16px 16px 4px 16px'
-                      : '16px 16px 16px 4px'
-                  }}>
+                  <div className="chat-bubble">
                     {msg.content}
                   </div>
-                  <div style={{
-                    ...styles.timestamp,
-                    textAlign: isOwn ? 'right' : 'left'
-                  }}>
+                  <div className={`chat-timestamp ${isOwn ? 'align-right' : 'align-left'}`}>
                     {new Date(msg.created_at).toLocaleTimeString([], {
                       hour:   '2-digit',
                       minute: '2-digit'
@@ -305,23 +341,20 @@ export default function Chat({ messageId: propMessageId }) {
         </div>
 
         {/* Input */}
-        <div style={styles.inputRow}>
+        <div className="chat-input-row">
           <input
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSend()}
             placeholder="Type a message..."
-            style={styles.input}
+            className="chat-input"
           />
           <button
+            ref={sendBtnRef}
             onClick={handleSend}
-            disabled={!input.trim()}
-            style={{
-              ...styles.sendBtn,
-              opacity: input.trim() ? 1 : 0.5
-            }}
+            className={`chat-send-btn ${input.trim() ? 'is-filled' : 'is-empty'}${isSending ? ' is-sending' : ''}`}
           >
-            Send
+            <span className="btn-label">Send</span>
           </button>
         </div>
 
@@ -329,185 +362,3 @@ export default function Chat({ messageId: propMessageId }) {
     </div>
   );
 }
-
-// ─────────────────────────────────────────────
-// STYLES
-// ─────────────────────────────────────────────
-
-const styles = {
-  wrapper: {
-    display:       'flex',
-    height:        '100vh',
-    fontFamily:    'sans-serif',
-    background:    '#f9fafb',
-  },
-  emptyWrapper: {
-    display:        'flex',
-    flexDirection:  'column',
-    alignItems:     'center',
-    justifyContent: 'center',
-    height:         '100vh',
-    background:     '#f9fafb',
-  },
-  emptyIcon: {
-    fontSize:      '48px',
-    marginBottom:  '16px',
-  },
-  emptyTitle: {
-    fontSize:      '18px',
-    fontWeight:    '600',
-    color:         '#111827',
-    margin:        '0 0 8px 0',
-  },
-  emptyText: {
-    fontSize:      '14px',
-    color:         '#6b7280',
-    textAlign:     'center',
-    maxWidth:      '300px',
-  },
-  sidebar: {
-    width:         '260px',
-    background:    '#fff',
-    borderRight:   '1px solid #e5e7eb',
-    display:       'flex',
-    flexDirection: 'column',
-    overflowY:     'auto',
-  },
-  sidebarHeader: {
-    padding:        '16px',
-    fontWeight:     '600',
-    fontSize:       '14px',
-    borderBottom:   '1px solid #e5e7eb',
-    display:        'flex',
-    justifyContent: 'space-between',
-    alignItems:     'center',
-  },
-  onlineBadge: {
-    fontSize:      '11px',
-    background:    '#dcfce7',
-    color:         '#16a34a',
-    padding:       '2px 8px',
-    borderRadius:  '999px',
-  },
-  participantRow: {
-    display:        'flex',
-    alignItems:     'center',
-    justifyContent: 'space-between',
-    padding:        '10px 16px',
-    borderBottom:   '1px solid #f3f4f6',
-  },
-  participantInfo: {
-    display:   'flex',
-    alignItems:'center',
-    gap:       '8px',
-    overflow:  'hidden',
-  },
-  onlineDot: {
-    width:        '8px',
-    height:       '8px',
-    borderRadius: '50%',
-    flexShrink:   0,
-  },
-  participantEmail: {
-    fontSize:     '13px',
-    overflow:     'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace:   'nowrap',
-  },
-  removeBtn: {
-    background:   'none',
-    border:       'none',
-    color:        '#ef4444',
-    cursor:       'pointer',
-    fontSize:     '12px',
-    padding:      '2px 6px',
-    borderRadius: '4px',
-    flexShrink:   0,
-  },
-  chatPanel: {
-    flex:          1,
-    display:       'flex',
-    flexDirection: 'column',
-    overflow:      'hidden',
-  },
-  chatHeader: {
-    padding:      '16px',
-    fontWeight:   '600',
-    fontSize:     '15px',
-    borderBottom: '1px solid #e5e7eb',
-    background:   '#fff',
-  },
-  loadMoreBtn: {
-    margin:       '8px auto',
-    display:      'block',
-    background:   'none',
-    border:       '1px solid #e5e7eb',
-    borderRadius: '999px',
-    padding:      '4px 16px',
-    fontSize:     '12px',
-    cursor:       'pointer',
-    color:        '#6b7280',
-  },
-  messageList: {
-    flex:          1,
-    overflowY:     'auto',
-    padding:       '16px',
-    display:       'flex',
-    flexDirection: 'column',
-    gap:           '8px',
-  },
-  messageRow: {
-    display: 'flex',
-  },
-  messageGroup: {
-    maxWidth: '70%',
-  },
-  senderLabel: {
-    fontSize:     '11px',
-    color:        '#9ca3af',
-    marginBottom: '2px',
-    paddingLeft:  '4px',
-  },
-  bubble: {
-    padding:    '10px 14px',
-    fontSize:   '14px',
-    lineHeight: '1.4',
-    wordBreak:  'break-word',
-  },
-  timestamp: {
-    fontSize:   '10px',
-    color:      '#9ca3af',
-    marginTop:  '2px',
-    padding:    '0 4px',
-  },
-  inputRow: {
-    display:      'flex',
-    padding:      '12px 16px',
-    borderTop:    '1px solid #e5e7eb',
-    background:   '#fff',
-    gap:          '8px',
-  },
-  input: {
-    flex:         1,
-    padding:      '10px 14px',
-    borderRadius: '999px',
-    border:       '1px solid #e5e7eb',
-    fontSize:     '14px',
-    outline:      'none',
-  },
-  sendBtn: {
-    padding:      '10px 20px',
-    background:   '#0084ff',
-    color:        '#fff',
-    border:       'none',
-    borderRadius: '999px',
-    fontSize:     '14px',
-    cursor:       'pointer',
-    fontWeight:   '500',
-  },
-  center: {
-    textAlign: 'center',
-    color:     '#6b7280',
-    marginTop: '40px',
-  },
-};

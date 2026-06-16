@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "./home.css";
 import NavScrollExample from "./navbar.jsx";
+import PageTransition from "./components/PageTransition.jsx";
+import { staggerCards, fadeIn, appearBtn } from "./lib/animate.js";
 // import ChatModal from "./ChatModal.jsx";
 
 function Home() {
@@ -14,7 +16,12 @@ function Home() {
   const [userApplications, setUserApplications] = useState({});
   const [staffMessages, setStaffMessages] = useState([]);
   const [applicantsByMessage, setApplicantsByMessage] = useState({});
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  const cardsRef = useRef(null);
+  const emptyRef = useRef(null);
+  const btnsRef = useRef([]);
 
   async function loadMessages(searchQuery = "") {
     try {
@@ -62,6 +69,8 @@ function Home() {
       console.error("Error loading messages:", error);
       setMessages([]);
       setStaffMessages([]);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -180,6 +189,10 @@ function Home() {
   useEffect(() => {
     loadMessages();
     loadUserApplications();
+    document.body.classList.add('light-theme');
+    return () => {
+      document.body.classList.remove('light-theme');
+    };
   }, []);
 
   useEffect(() => {
@@ -187,6 +200,31 @@ function Home() {
       loadAllApplicants();
     }
   }, [staffMessages]);
+
+  // Animate cards after data loads
+  useEffect(() => {
+    if (loading) return;
+
+    if (cardsRef.current) {
+      const cards = cardsRef.current.querySelectorAll('.project-card, .staff-project-card');
+      if (cards.length > 0) {
+        staggerCards(cards);
+      }
+    }
+
+    // Animate empty state
+    if (emptyRef.current) {
+      fadeIn(emptyRef.current);
+    }
+  }, [loading, messages, staffMessages, user]);
+
+  // Animate buttons after cards rendered
+  useEffect(() => {
+    if (loading) return;
+    btnsRef.current.forEach((btn, i) => {
+      if (btn) appearBtn(btn, i * 60);
+    });
+  }, [loading, messages, userApplications]);
 
   function handleMessageClick(userId, email) {
     if (userId && email) {
@@ -223,109 +261,128 @@ function Home() {
   //   }
   // }
 
+  /** Determine button state class */
+  const getBtnState = (appStatus) => {
+    if (appStatus === "accepted" || appStatus === "selected") return "state-selected";
+    if (appStatus === "pending") return "state-applied";
+    if (appStatus === "rejected") return "state-rejected";
+    return "state-default";
+  };
+
+  /** Determine button label */
+  const getBtnLabel = (appStatus) => {
+    if (appStatus === "accepted" || appStatus === "selected") return "✓ SELECTED";
+    if (appStatus === "pending") return "⏳ APPLIED";
+    if (appStatus === "rejected") return "✗ REJECTED";
+    return "APPLY";
+  };
+
   return (
     <>
       <NavScrollExample onSearch={(query) => loadMessages(query)} />
-      <div className="container">
-        {user?.typeofuser === "staff" ? (
-          // STAFF VIEW: Applications Received
-          <>
-            <h2>Applications Received</h2>
-            {staffMessages.length === 0 ? (
-              <div className="empty-state">No messages posted yet.</div>
-            ) : (
-              staffMessages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className="project"
-                  style={{ marginBottom: 12, padding: 12, border: '1px solid #eee' }}
-                >
-                  <div className="message">{msg.message_text}</div>
-                  <div className="email">Posted by: {msg.email}</div>
-                  <div className="time">{new Date(msg.created_at).toLocaleString()}</div>
-                  
-                  <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #ddd' }}>
-                    <h4>Applicants ({applicantsByMessage[msg.id]?.length || 0})</h4>
-                    {applicantsByMessage[msg.id] && applicantsByMessage[msg.id].length > 0 ? (
-                      <div style={{ marginTop: 10 }}>
-                        {applicantsByMessage[msg.id].map((app) => (
-                          <div key={app.id} style={{ padding: 8, backgroundColor: '#f5f5f5', marginBottom: 8, borderRadius: 4 }}>
-                            <div><strong>Email:</strong> {app.applicant_email}</div>
-                            {app.applicant_resume_url && (
-                                <div><strong>Resume:</strong> <a href={app.applicant_resume_url} target="_blank" rel="noreferrer">View Resume</a></div>
-                            )}
-                            {app.application_message && (
-                                <div><strong>Message:</strong> {app.application_message}</div>
-                            )}
-                            <div><strong>Status:</strong> <span 
-                            style={{ color: app.status === "pending" ? "orange" : app.status === "accepted" ? "green" : "red" }}
-                            >{app.status}</span></div>
-                            <div><strong>Applied:</strong> {new Date(app.created_at).toLocaleString()}</div>
-                          </div>
-                        ))}
+      <PageTransition>
+        <div className="home-container">
+          {/* Loading skeleton */}
+          {loading && (
+            <>
+              <div className="skeleton skeleton-card" />
+              <div className="skeleton skeleton-card" />
+              <div className="skeleton skeleton-card" />
+              <div className="skeleton skeleton-card" />
+            </>
+          )}
+
+          {!loading && user?.typeofuser === "staff" ? (
+            // STAFF VIEW: Applications Received
+            <>
+              <h2>Applications Received</h2>
+              {staffMessages.length === 0 ? (
+                <div className="home-empty-state" ref={emptyRef}>No messages posted yet.</div>
+              ) : (
+                <div ref={cardsRef}>
+                  {staffMessages.map((msg) => (
+                    <div
+                      key={msg.id}
+                      className="staff-project-card"
+                    >
+                      <div className="card-title">{msg.message_text}</div>
+                      <div className="card-email">Posted by: {msg.email}</div>
+                      <div className="card-time">{new Date(msg.created_at).toLocaleString()}</div>
+                      
+                      <div className="staff-applicants-divider">
+                        <h4>Applicants ({applicantsByMessage[msg.id]?.length || 0})</h4>
+                        {applicantsByMessage[msg.id] && applicantsByMessage[msg.id].length > 0 ? (
+                          <>
+                            {applicantsByMessage[msg.id].map((app) => (
+                              <div key={app.id} className="staff-applicant-row">
+                                <div><strong>Email:</strong> {app.applicant_email}</div>
+                                {app.applicant_resume_url && (
+                                    <div><strong>Resume:</strong> <a href={app.applicant_resume_url} target="_blank" rel="noreferrer">View Resume</a></div>
+                                )}
+                                {app.application_message && (
+                                    <div><strong>Message:</strong> {app.application_message}</div>
+                                )}
+                                <div><strong>Status:</strong> <span 
+                                className={`applicant-status-text ${app.status}`}
+                                >{app.status}</span></div>
+                                <div><strong>Applied:</strong> {new Date(app.created_at).toLocaleString()}</div>
+                              </div>
+                            ))}
+                          </>
+                        ) : (
+                          <div className="no-applicants-text">No applicants yet</div>
+                        )}
                       </div>
-                    ) : (
-                      <div style={{ color: '#999', fontStyle: 'italic' }}>No applicants yet</div>
-                    )}
-                  </div>
+                    </div>
+                  ))}
                 </div>
-              ))
-            )}
-          </>
-        ) : (
-          // STUDENT VIEW: All Projects (Status Mode)
-          <>
-            <h2>All Project</h2>
-            {messages.length === 0 ? (
-              <div className="empty-state">No messages yet.</div>
-            ) : (
-              messages.map((msg) => (
-                <div 
-                  key={msg.id} 
-                  className="project" 
-                  style={{ marginBottom: 12, padding: 12, border: '1px solid #eee' }}
-                >
-                  <div className="message">{msg.message_text}</div>
-                  <div className="email">{msg.email}</div>
-                  <div className="time">{new Date(msg.created_at).toLocaleString()}</div>
-                  {(() => {
+              )}
+            </>
+          ) : !loading ? (
+            // STUDENT VIEW: All Projects (Status Mode)
+            <>
+              <h2>All Projects</h2>
+              {messages.length === 0 ? (
+                <div className="home-empty-state" ref={emptyRef}>No messages yet.</div>
+              ) : (
+                <div ref={cardsRef}>
+                  {messages.map((msg, idx) => {
                     const appStatus = userApplications[msg.id];
-                    
-                    if (appStatus === "accepted" || appStatus === "selected") {
-                      return (
-                        <button className="apply-status apply" onClick={(e) => e.stopPropagation()}>
-                          ✓ SELECTED
-                        </button>
-                      );
-                    } else if (appStatus === "pending") {
-                      return (
-                        <button className="btn-applied apply" onClick={(e) => e.stopPropagation()}>
-                          ⏳ APPLIED
-                        </button>
-                      );
-                    } else if (appStatus === "rejected") {
-                      return (
-                        <button className="btn-rejected apply" onClick={(e) => e.stopPropagation()}>
-                          ✗ REJECTED
-                        </button>
-                      );
-                    } else {
-                      return (
+                    const btnState = getBtnState(appStatus);
+                    const btnLabel = getBtnLabel(appStatus);
+
+                    return (
+                      <div 
+                        key={msg.id} 
+                        className="project-card"
+                      >
+                        <div className="card-title">{msg.message_text}</div>
+                        <div className="card-email">{msg.email}</div>
+                        <div className="card-time">{new Date(msg.created_at).toLocaleString()}</div>
+
+                        {/* IRON RULE: Single button, always in DOM, state via className */}
                         <button
-                          className="apply"
-                          onClick={(e) => handleApply(e, msg.id, msg.user_id)}
+                          ref={(el) => { btnsRef.current[idx] = el; }}
+                          className={`apply-btn ${btnState}`}
+                          onClick={(e) => {
+                            if (btnState === "state-default") {
+                              handleApply(e, msg.id, msg.user_id);
+                            } else {
+                              e.stopPropagation();
+                            }
+                          }}
                         >
-                            APPLY
-                          </button>
-                        );
-                    }
-                  })()}
+                          <span className="btn-label">{btnLabel}</span>
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
-              ))
-            )}
-          </>
-        )}
-      </div>
+              )}
+            </>
+          ) : null}
+        </div>
+      </PageTransition>
 
       {chatOpen && selectedUser && (
         <ChatModal
