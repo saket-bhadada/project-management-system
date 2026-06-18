@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getWebSocketURL } from './config';
 import { fadeIn, slideInLeft, appearBtn } from './lib/animate.js';
+import NavScrollExample from './navbar.jsx';
 import './chat.css';
 
 // ─────────────────────────────────────────────
@@ -145,6 +146,14 @@ export default function Chat({ messageId: propMessageId }) {
     }
   }, [loading, messages]);
 
+  // Apply light theme
+  useEffect(() => {
+    document.body.classList.add('light-theme');
+    return () => {
+      document.body.classList.remove('light-theme');
+    };
+  }, []);
+
   // Fetch roomId for this message
   useEffect(() => {
     if (!messageId || !user) return;
@@ -247,7 +256,9 @@ export default function Chat({ messageId: propMessageId }) {
 
   // ── MAIN UI ──
   return (
-    <div className="chat-wrapper">
+    <>
+      <NavScrollExample />
+      <div className="chat-wrapper">
 
       {/* ── LEFT PANEL — Participants ── */}
       <div className="chat-sidebar">
@@ -360,5 +371,6 @@ export default function Chat({ messageId: propMessageId }) {
 
       </div>
     </div>
+    </>
   );
 }

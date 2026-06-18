@@ -2,7 +2,7 @@
 .pm-root {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: calc(100vh - 60px);
   width: 100%;
   background-color: var(--color-bg);
   color: var(--color-text-1);
@@ -739,3 +739,120 @@
   0% { transform: translateY(10px); opacity: 0; }
   100% { transform: translateY(0); opacity: 1; }
 }
+
+/* ─── Light Mode overrides for Project Manager ─── */
+body.light-theme .pm-root {
+  background-color: #f6f8fa !important;
+  color: #1f2328 !important;
+}
+
+body.light-theme .pm-topbar {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-theme .pm-sidebar {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-theme .pm-sidebar-header {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: #57606a !important;
+}
+
+body.light-theme .pm-breadcrumb {
+  background-color: #f6f8fa !important;
+}
+
+body.light-theme .pm-breadcrumb-name {
+  color: #1f2328 !important;
+}
+
+body.light-theme .pm-file-item:hover::before,
+body.light-theme .pm-file-item--active::before {
+  background-color: #f6f8fa !important;
+}
+
+body.light-theme .pm-file-item {
+  color: #57606a !important;
+}
+
+body.light-theme .pm-editor-area {
+  background-color: #ffffff !important;
+}
+
+body.light-theme .pm-editor-toolbar {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-theme .pm-line-count {
+  color: #57606a !important;
+}
+
+body.light-theme .pm-line-numbers {
+  background-color: #f6f8fa !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: #8c95a1 !important;
+}
+
+body.light-theme .pm-editor {
+  color: #1f2328 !important;
+}
+
+body.light-theme .pm-activity-panel {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-theme .pm-panel-header {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: #1f2328 !important;
+}
+
+body.light-theme .pm-activity-email {
+  color: #1f2328 !important;
+}
+
+body.light-theme .pm-activity-action {
+  color: #57606a !important;
+}
+
+body.light-theme .pm-modal {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: #1f2328 !important;
+}
+
+body.light-theme .pm-modal-header {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-theme .pm-history-item {
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+body.light-theme .pm-history-author {
+  color: #1f2328 !important;
+}
+
+body.light-theme .pm-history-summary {
+  color: #57606a !important;
+}
+
+body.light-theme .pm-new-file-form {
+  background-color: #f6f8fa !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-theme .pm-new-file-input {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  color: #1f2328 !important;
+}
+
+body.light-theme .pm-new-file-input:focus {
+  border-color: #0969da !important;
+}
+

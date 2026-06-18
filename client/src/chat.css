@@ -1,7 +1,7 @@
 /* chat.css */
 .chat-wrapper {
   display: flex;
-  height: 100vh;
+  height: calc(100vh - 60px);
   width: 100%;
   background-color: var(--color-bg);
   color: var(--color-text-1, #f0f0f8);
@@ -346,4 +346,94 @@
 
 .chat-send-btn.is-sending {
   transform: scale(0.88);
+}
+
+/* ─── Light Mode overrides for Chat ─── */
+body.light-theme .chat-wrapper {
+  background-color: #f6f8fa !important;
+  color: #1f2328 !important;
+}
+
+body.light-theme .chat-sidebar {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-theme .chat-sidebar-header {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: #1f2328 !important;
+}
+
+body.light-theme .chat-participant-row {
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+body.light-theme .chat-participant-row:hover {
+  background-color: #f6f8fa !important;
+}
+
+body.light-theme .chat-participant-email {
+  color: #1f2328 !important;
+}
+
+body.light-theme .chat-panel {
+  background-color: #f6f8fa !important;
+}
+
+body.light-theme .chat-panel-header {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: #1f2328 !important;
+}
+
+body.light-theme .chat-input-row {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-theme .chat-input {
+  background-color: #f6f8fa !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  color: #1f2328 !important;
+}
+
+body.light-theme .chat-input:focus {
+  border-color: #0969da !important;
+}
+
+body.light-theme .is-other .chat-bubble {
+  background-color: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: #1f2328 !important;
+}
+
+body.light-theme .chat-empty-title {
+  color: #1f2328 !important;
+}
+
+body.light-theme .chat-empty-text {
+  color: #57606a !important;
+}
+
+body.light-theme .chat-center-text {
+  color: #57606a !important;
+}
+
+body.light-theme .chat-sender-label {
+  color: #57606a !important;
+}
+
+body.light-theme .chat-timestamp {
+  color: #8c95a1 !important;
+}
+
+body.light-theme .chat-load-more-btn {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  color: #57606a !important;
+}
+
+body.light-theme .chat-load-more-btn:hover {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.16) !important;
+  color: #1f2328 !important;
 }

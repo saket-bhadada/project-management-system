@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { getWebSocketURL } from "./config";
 import "./workspace.css";
 import { appearBtn } from "./lib/animate.js";
+import NavScrollExample from "./navbar.jsx";
 
 // Reusable hook to check user session
 function useAuth() {
@@ -76,6 +77,14 @@ export default function Workspace() {
       buttonsInitRef.current = true;
     }
   });
+
+  // Apply light theme
+  useEffect(() => {
+    document.body.classList.add('light-theme');
+    return () => {
+      document.body.classList.remove('light-theme');
+    };
+  }, []);
 
   // Sync scroll between line numbers and textarea
   const handleScroll = () => {
@@ -400,9 +409,11 @@ export default function Workspace() {
   }
 
   return (
-    <div className="workspace-root dark-mode" ref={workspaceRootRef}>
+    <>
+      <NavScrollExample />
+      <div className="workspace-root dark-mode" ref={workspaceRootRef}>
       
-      {/* ── TOP HEADER BAR ── */}
+        {/* ── TOP HEADER BAR ── */}
       <header className="workspace-header">
         <div className="header-left">
           <Link to={`/chats/${messageId}`} className="back-link">
@@ -774,6 +785,7 @@ export default function Workspace() {
         </div>
       )}
 
-    </div>
+      </div>
+    </>
   );
 }

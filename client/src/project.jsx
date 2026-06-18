@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getWebSocketURL } from "./config";
 import "./project.css";
 import { appearBtn } from "./lib/animate.js";
+import NavScrollExample from "./navbar.jsx";
 
 
 // ── Language detection ──
@@ -136,6 +137,14 @@ export default function ProjectManager() {
       });
     }
   });
+
+  // Apply light theme
+  useEffect(() => {
+    document.body.classList.add('light-theme');
+    return () => {
+      document.body.classList.remove('light-theme');
+    };
+  }, []);
 
   // Load user
   useEffect(() => {
@@ -411,15 +420,20 @@ export default function ProjectManager() {
 
   if (loading)
     return (
-      <div className="pm-loading">
-        <div className="pm-loading-spinner" />
-        <span>Loading project…</span>
-      </div>
+      <>
+        <NavScrollExample />
+        <div className="pm-loading">
+          <div className="pm-loading-spinner" />
+          <span>Loading project…</span>
+        </div>
+      </>
     );
 
   return (
-    <div className="pm-root" ref={rootRef}>
-      {/* ── TOP BAR ── */}
+    <>
+      <NavScrollExample />
+      <div className="pm-root" ref={rootRef}>
+        {/* ── TOP BAR ── */}
       <header className="pm-topbar">
         <div className="pm-topbar-left">
           <button className="pm-back-btn" onClick={() => navigate(-1)}>
@@ -891,5 +905,6 @@ export default function ProjectManager() {
         </div>
       )}
     </div>
+    </>
   );
 }
