@@ -50,6 +50,16 @@ export default function Workspace() {
   const [loadingActivities, setLoadingActivities] = useState(false);
   const [showActivities, setShowActivities] = useState(false);
 
+  const [toasts, setToasts] = useState([]);
+  const [saveFlash, setSaveFlash] = useState(false);
+
+  const showToast = (message, type = "info") => {
+    const id = Date.now();
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 3500);
+  };
   // Split-Screen Chat Sidebar State
   const [showChat, setShowChat] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
@@ -141,7 +151,7 @@ export default function Workspace() {
         setChangeSummary("");
         fetchFileHistory(file.id);
       } else {
-        alert("Failed to load file content.");
+        showToast("Failed to load file content.", "error");
       }
     } catch (err) {
       console.error(err);
@@ -211,13 +221,15 @@ export default function Workspace() {
         setChangeSummary("");
         fetchFileHistory(selectedFile.id);
         fetchActivity();
-        alert("File saved successfully!");
+        setSaveFlash(true);
+        setTimeout(() => setSaveFlash(false), 1500);
+        showToast("File saved successfully!", "success");
       } else {
-        alert("Failed to save file.");
+        showToast("Failed to save file.", "error");
       }
     } catch (err) {
       console.error(err);
-      alert("Error occurred while saving.");
+      showToast("Error occurred while saving.", "error");
     }
   };
 
@@ -243,7 +255,7 @@ export default function Workspace() {
       // Therefore, we check if the response parses into a valid file object despite status code.
       const data = await response.json().catch(() => ({}));
       
-      if (response.ok || (response.status === 404 && data.id)) {
+      if (response.ok) {
         setShowNewFileModal(false);
         setNewFileName("");
         setNewFilePath("/");
@@ -257,13 +269,13 @@ export default function Workspace() {
         if (data.id) {
           handleSelectFile(data);
         }
-        alert("File created successfully!");
+        showToast("File created successfully!", "success");
       } else {
-        alert(data.error || data.message || "Failed to create file.");
+        showToast(data.error || data.message || "Failed to create file.", "error");
       }
     } catch (err) {
       console.error(err);
-      alert("Server error when creating file.");
+      showToast("Server error when creating file.", "error");
     }
   };
 
@@ -284,9 +296,9 @@ export default function Workspace() {
         setEditorContent("");
         setHistory([]);
         fetchActivity();
-        alert("File deleted successfully!");
+        showToast("File deleted successfully!", "success");
       } else {
-        alert("Failed to delete file.");
+        showToast("Failed to delete file.", "error");
       }
     } catch (err) {
       console.error(err);
@@ -296,6 +308,12 @@ export default function Workspace() {
   // ── INTEGRATED WEBSOCKET CHAT LOGIC ──
   const toggleChat = () => {
     setShowChat(!showChat);
+    if (!showChat) setShowActivities(false);
+  };
+
+  const toggleActivities = () => {
+    setShowActivities(!showActivities);
+    if (!showActivities) setShowChat(false);
   };
 
   // Scroll chat to bottom
@@ -411,7 +429,7 @@ export default function Workspace() {
   return (
     <>
       <NavScrollExample />
-      <div className="workspace-root dark-mode" ref={workspaceRootRef}>
+      <div className="workspace-root" ref={workspaceRootRef}>
       
         {/* ── TOP HEADER BAR ── */}
       <header className="workspace-header">
@@ -431,7 +449,7 @@ export default function Workspace() {
         <div className="header-right">
           <button 
             className={`workspace-icon-btn ${showActivities ? "active" : ""}`} 
-            onClick={() => { setShowActivities(!showActivities); fetchActivity(); }}
+            onClick={() => { toggleActivities(); fetchActivity(); }}
             title="Project Activity Feed"
           >
             <span className="btn-label">📋 Activity Logs</span>
@@ -557,7 +575,7 @@ export default function Workspace() {
                   />
                 </div>
                 <button 
-                  className="save-file-btn" 
+                  className={`save-file-btn ${saveFlash ? "success-flash" : ""}`} 
                   onClick={handleSaveFile}
                   disabled={loadingContent}
                 >
@@ -784,6 +802,18 @@ export default function Workspace() {
           </div>
         </div>
       )}
+
+      {/* ── TOAST NOTIFICATIONS ── */}
+      <div className="workspace-toast-container">
+        {toasts.map((toast) => (
+          <div key={toast.id} className={`workspace-toast ${toast.type}`}>
+            <span className="toast-icon">
+              {toast.type === "success" ? "✓" : toast.type === "error" ? "✕" : "ℹ"}
+            </span>
+            <span className="toast-message">{toast.message}</span>
+          </div>
+        ))}
+      </div>
 
       </div>
     </>

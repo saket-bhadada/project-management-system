@@ -168,7 +168,7 @@ export default function ProjectManager() {
       return;
     }
     const data = await r.json();
-    setFiles(data);
+    setFiles(data.files || []);
     setLoading(false);
   }, [messageId]);
 
@@ -201,7 +201,7 @@ export default function ProjectManager() {
         credentials: "include",
       });
       const f = await r.json();
-      setFileContents((prev) => ({ ...prev, [fileId]: f.content }));
+      setFileContents((prev) => ({ ...prev, [fileId]: f.file?.content ?? '' }));
       send({ type: "viewing_file", fileId });
     },
     [messageId, fileContents, send],
@@ -755,7 +755,7 @@ export default function ProjectManager() {
                       History
                     </span>
                   </button>
-                  <span className="pm-shortcut">⌘S to save</span>
+                  <span className="pm-shortcut">{navigator.platform?.includes('Mac') ? '⌘' : 'Ctrl+'}S to save</span>
                 </div>
               </div>
 
@@ -779,7 +779,6 @@ export default function ProjectManager() {
                   autoCorrect="off"
                   autoCapitalize="off"
                   onKeyDown={(e) => {
-                    // Tab → insert 2 spaces
                     if (e.key === "Tab") {
                       e.preventDefault();
                       const { selectionStart: s, selectionEnd: end } = e.target;
@@ -789,6 +788,16 @@ export default function ProjectManager() {
                         ...prev,
                         [activeFileId]: newVal,
                       }));
+                      setDirtyFiles((prev) => new Set(prev).add(activeFileId));
+                      send({
+                        type: "file_edit",
+                        fileId: activeFileId,
+                        content: newVal,
+                        cursorLine: newVal.slice(0, s + 2).split("\n").length,
+                        cursorCol: (s + 2) - newVal.lastIndexOf("\n", s + 1) - 1,
+                      });
+                      clearTimeout(saveTimerRef.current);
+                      saveTimerRef.current = setTimeout(() => saveFile(activeFileId, newVal), 3000);
                       setTimeout(() => {
                         e.target.selectionStart = e.target.selectionEnd = s + 2;
                       }, 0);

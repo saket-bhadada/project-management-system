@@ -105,7 +105,7 @@ export function setupProjectWS(server, sessionParser) {
                   [content, fileId, currentProject],
                 );
                 await db.query(
-                  `INSERT INTO project_file_versions (file_id, content, changed_by, change_summary)
+                  `INSERT INTO project_files_version (file_id, content, changed_by, change_summery)
                    VALUES ($1, $2, $3, $4)`,
                   [fileId, content, userId, changeSummary || "Saved"],
                 );

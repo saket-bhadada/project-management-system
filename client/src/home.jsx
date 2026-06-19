@@ -384,14 +384,7 @@ function Home() {
         </div>
       </PageTransition>
 
-      {chatOpen && selectedUser && (
-        <ChatModal
-          isOpen={chatOpen}
-          onClose={closeChat}
-          userId={selectedUser.userId}
-          userEmail={selectedUser.email}
-        />
-      )}
+      {/* ChatModal removed — component does not exist in codebase */}
     </>
   );
 }

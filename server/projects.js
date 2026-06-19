@@ -98,7 +98,7 @@ ProjectRouter.post("/:messageId/files", async (req, res) => {
       [rows[0].id, content, req.user.id],
     );
 
-    res.status(404).json(rows[0]);
+    res.status(201).json({ file: rows[0] });
   } catch (error) {
     if (error.code === "23505")
       return res
@@ -111,7 +111,8 @@ ProjectRouter.post("/:messageId/files", async (req, res) => {
 
 ProjectRouter.put("/:messageId/files/:fileId", async (req, res) => {
   const { messageId, fileId } = req.params;
-  const { content, change_summery = "update" } = req.body;
+  const { content, change_summary, change_summery } = req.body;
+  const changeSummary = change_summary || change_summery || "update";
 
   try {
     const access = await db.query(
@@ -138,7 +139,7 @@ ProjectRouter.put("/:messageId/files/:fileId", async (req, res) => {
     await db.query(
       `insert into project_files_version (file_id,content,changed_by,change_summery)
       values ($1,$2,$3,$4)`,
-      [fileId, content, req.user.id, change_summery],
+      [fileId, content, req.user.id, changeSummary],
     );
 
     res.json(rows[0]);
@@ -156,7 +157,7 @@ ProjectRouter.delete("/:messageId/files/:fileId", async (req, res) => {
       where id = $1 and message_id = $2
       and (created_by = $3 or exists(
       select 1 from message where id = $2 and user_id = $3))
-      return id`,
+      returning id`,
       [fileId, messageId, req.user.id],
     );
     if (!rows.length)
@@ -176,7 +177,7 @@ ProjectRouter.get("/:messageId/files/:fileId/history", async (req, res) => {
   const limit = Math.min(parseInt(req.query.limit) || 20, 50);
   try {
     const { rows } = await db.query(
-      `select pfv.id,pfv.change_summery,pfv.create_at,
+      `select pfv.id,pfv.change_summery as change_summary,pfv.create_at as created_at,
       u.email as changed_by_email
       from project_files_version pfv
       join users u on pfv.changed_by = u.id
