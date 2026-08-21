@@ -2,25 +2,37 @@
 
 A comprehensive project management platform with real-time collaboration features, user authentication, and project tracking capabilities.
 
-## 🌟 Features
+## 🌟 Core Concepts
 
-| Feature                     | Description                                                                   |
-| --------------------------- | ----------------------------------------------------------------------------- |
-| **👥 User Authentication**  | Secure login/registration with local credentials and Google OAuth integration |
-| **📝 Profile Management**   | Create and manage user profiles with personalized information                 |
-| **✅ Project Applications** | Track and manage project applications with status monitoring                  |
-| **💬 Real-Time Chat**       | Instant messaging with WebSocket support for live communication               |
-| **📊 Status Dashboard**     | Monitor project status and track application progress                         |
-| **🎨 Responsive UI**        | Modern, responsive interface built with React and Bootstrap                   |
+The platform is built around a streamlined workflow connecting project owners with contributors:
+1. **Projects (Messages):** Users can post project ideas or job openings. 
+2. **Applications:** Other users can discover these projects and submit applications to join them.
+3. **Automated Onboarding:** When a project owner accepts an application, the system automatically provisions a dedicated real-time chat room and collaborative workspace for the owner and applicant.
+4. **Collaborative Workspaces:** Participants get access to a shared environment where they can chat in real-time, create files, edit code/text, and track file version history.
+
+## ✨ Features
+
+| Feature                             | Description                                                                                   |
+| ----------------------------------- | --------------------------------------------------------------------------------------------- |
+| **👥 User Authentication**          | Secure login/registration with local credentials and Google OAuth integration                 |
+| **📝 Profile Management**           | Manage user profiles with personalized information, resumes, and user roles                   |
+| **🔍 Project Discovery & Search**   | Browse and search for available projects on the central dashboard                             |
+| **✅ Application System**           | Apply to projects with custom messages and track application status                           |
+| **⚙️ Automated Workflows**          | Accepting an applicant automatically creates a private chat room and project workspace        |
+| **💬 Real-Time Chat**               | Instant messaging within project rooms using WebSockets, including presence (online status)   |
+| **📁 Collaborative Workspaces**     | Create, edit, and manage project files securely among project participants                    |
+| **🕰️ File Versioning & History**    | Track file changes with version history, activity feeds, and change summaries                 |
+| **📊 Status Dashboard**             | Monitor project status and track application progress                                         |
+| **🎨 Responsive UI**                | Modern, responsive interface built with React, Vite, and Bootstrap                            |
 
 ## 🏗️ Architecture
 
-```
+```text
 Project Management System
 ├── client/          (React + Vite Frontend)
-│   └── Features: Login, Profile, Applications, Chat, Status Dashboard
+│   └── Features: Login, Profile, Dashboard, Applications, Chat, Workspace (File Management)
 └── server/          (Express Backend)
-    └── Features: Auth, WebSocket, Database, REST API
+    └── Features: Auth (Passport), Real-time WebSocket (Chat & Presence), PostgreSQL DB, REST API
 ```
 
 ### Tech Stack
@@ -106,14 +118,18 @@ GOOGLE_CLIENT_ID=your_google_oauth_id
 GOOGLE_CLIENT_SECRET=your_google_oauth_secret
 ```
 
-## 📱 Usage
+## 📱 Usage Workflow
 
-1. **Register/Login**: Create an account or sign in with Google
-2. **View Dashboard**: Access the home page to see projects and applications
-3. **Manage Profile**: Update your profile information
-4. **Track Applications**: Monitor project application statuses
-5. **Real-Time Chat**: Communicate with team members instantly
-6. **Check Status**: View current project and application status
+1. **Register/Login**: Create an account or sign in securely (via Google OAuth or local credentials).
+2. **Set up Profile**: Add your resume and configure your user type.
+3. **Discover Projects**: Search and browse project postings on the Dashboard.
+4. **Apply to Projects**: Submit an application to projects that interest you.
+5. **Manage Applicants**: Project owners can review applications and accept/reject them.
+6. **Collaborate in Workspaces**: Upon acceptance, jump into the auto-generated project workspace to:
+   - **Chat in Real-Time** with team members.
+   - **Manage Files**: Create and edit shared project files.
+   - **Track Changes**: View activity feeds and file version history.
+7. **Check Status**: View current project and application status on the dedicated status page.
 
 ## 🛠️ Available Commands
 
